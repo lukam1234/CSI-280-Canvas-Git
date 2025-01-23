@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "canvas"
+description = "Canvas CLI tool."
+version = "0.1.0"
+authors = ["EOF-D <END-OFD@pm.me>"] # TODO: Add team members.
+readme = "README.md"
+license = "MIT" # TODO: Remove placeholder license once decided by team members.
+
+keywords = ["canvas"]
+homepage = "https://github.com/EOF-D/CSI-280-Canvas-Git"
+packages = [{include = "canvas"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+isort = "^5.13.2"
+pre-commit = "^4.1.0"
+
+[tool.pyright]
+typeCheckingMode = "strict"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
