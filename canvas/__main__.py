@@ -21,9 +21,12 @@ def gen_parser() -> ArgumentParser:
 
 
 def main() -> None:
+    """The main entry point for the CLI."""
+
     parser = gen_parser()
     args = parser.parse_args()
 
+    # Print help if no arguments are passed.
     if not vars(args):
         parser.print_help()
 
