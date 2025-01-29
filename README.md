@@ -16,3 +16,4 @@ After this is completed you should have access to every dependency via `python -
 [//]: # (TODO: Team members should modify this file in their branches and create a PR to complete assignment 01.)
 ## Team Members
 - [Andy Zheng](https://github.com/EOF-D) - TEAM_MEMBER_ROLE
+- [Luka Moon](https://github.com/lukam1234) - TEAM_MEMBER_ROLE
