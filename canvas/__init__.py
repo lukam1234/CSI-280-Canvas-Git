@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 # flake8: noqa
+from .errors import *
 from .oauth import *
 from .utils import *
-from .errors import *
 
 __version__ = "v0.1.0"
 __authors__ = [
