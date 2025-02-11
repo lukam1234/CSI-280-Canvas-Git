@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from . import __version__
 from argparse import ArgumentParser
+
+from . import __version__
 
 
 def gen_parser() -> ArgumentParser:
