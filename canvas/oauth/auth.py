@@ -27,7 +27,7 @@ from attrs import define, field
 
 from ..utils import CanvasScope
 
-__all__ = ("AuthResponse",)
+__all__ = ("AuthResponse", "CanvasAuth")
 
 
 class AuthResponse(TypedDict):
