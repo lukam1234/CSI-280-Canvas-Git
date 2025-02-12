@@ -1,4 +1,5 @@
 from typing import NoReturn
+
 import pytest
 
 from canvas import CanvasScope

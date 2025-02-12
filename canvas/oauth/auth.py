@@ -1,8 +1,7 @@
 """Canvas LMS API OAuth2 client.
 ================================
 
-Implements a client for the OAuth2 web flow in order to-
-authenticate with the Canvas LMS API.
+Implements an async client for OAuth2 authentication with Canvas LMS API.
 
 Example
 -------
@@ -13,46 +12,29 @@ Example
         client_secret="YOUR_CLIENT_SECRET",
         redirect_uri="http://localhost:8000/callback",
         canvas_domain="YOUR_CANVAS_DOMAIN",
-        scopes="YOUR_SCOPES",
+        scopes=CanvasScope.USER_INFO, # Requested scopes.
     )
 
-    auth_url = auth.get_auth_url()
+    await auth.authenticate()  # Starts OAuth flow.
 """
 
 from __future__ import annotations
 
+import webbrowser
+from datetime import datetime, timedelta
 from secrets import token_urlsafe
-from typing import TypedDict
+from typing import Any, cast
 from urllib.parse import urlencode
 
 from attrs import define, field
 from httpx import AsyncClient, HTTPError
 
 from ..errors import AuthenticationError
+from ..utils import CanvasScope
+from .server import create_server
+from .types import OAuthCallback, OAuthToken, TokenResponse
 
-__all__ = ("AuthResponse", "CanvasAuth")
-
-
-class AuthResponse(TypedDict):
-    """Authentication response from Canvas LMS API.
-
-    :ivar access_token: The access token used for API requests.
-    :vartype access_token: str
-
-    :ivar token_type: The type of token.
-    :vartype token_type: str
-
-    :ivar refresh_token: Token used to obtain new access tokens.
-    :vartype refresh_token: str
-
-    :ivar expires_in: Number of seconds until token expiration.
-    :vartype expires_in: int
-    """
-
-    access_token: str
-    token_type: str
-    refresh_token: str
-    expires_in: int
+__all__ = ("CanvasAuth",)
 
 
 @define
@@ -72,7 +54,7 @@ class CanvasAuth:
     :type redirect_uri: str
 
     :param scopes: Requested API scopes.
-    :type scopes: str
+    :type scopes: :class:`CanvasScope`
 
     :ivar client_id: OAuth2 client ID from Canvas LMS.
     :vartype client_id: str
@@ -87,32 +69,37 @@ class CanvasAuth:
     :vartype redirect_uri: str
 
     :ivar scopes: Requested API scopes.
-    :vartype scopes: CanvasScope
+    :vartype scopes: :class:`CanvasScope`
     """
 
     client_id: str = field()
     client_secret: str = field()
     canvas_domain: str = field()
     redirect_uri: str = field(default="http://localhost:8000/callback")
-    scopes: str = field(default="")
+    scopes: CanvasScope = field(default=CanvasScope.NONE)
 
     _base_url: str = field(init=False)
-    _state: None | str = field(default=None, init=False)
-    _auth: None | AuthResponse = field(default=None, init=False)
+    _state: str = field(init=False)
+    _token: None | OAuthToken = field(init=False, default=None)
+    _client: AsyncClient = field(init=False)
 
     def __attrs_post_init__(self) -> None:
-        self._base_url = f"https://{self.canvas_domain}/"
-        self._state = None
-        self._auth = None
+        self._base_url = f"https://{self.canvas_domain}"
+        self._state = token_urlsafe(32)
+        self._client = AsyncClient()
 
-    def get_auth_url(self) -> str:
+    async def __aenter__(self) -> CanvasAuth:
+        return self
+
+    async def __aexit__(self, *_: Any) -> None:
+        await self.close()
+
+    def _get_auth_url(self) -> str:
         """Get the URL for the OAuth2 authentication flow.
-        Note that the only currently supported respone type is "code".
 
-        :return: Authorization URL to redirect users to.
+        :return: Authorization URL for Canvas OAuth.
         :rtype: str
         """
-        self._state = token_urlsafe(32)  # Stop CSRF attacks.
         params = {
             "client_id": self.client_id,
             "response_type": "code",
@@ -121,82 +108,138 @@ class CanvasAuth:
             "scope": self.scopes,
         }
 
-        return f"{self._base_url}login/oauth2/auth?{urlencode(params)}"
+        return f"{self._base_url}/login/oauth2/auth?{urlencode(params)}"
 
-    async def fetch_token(self) -> str:
-        """Fetch the access token for the authenticated user.
+    async def _handle_callback(self, callback: OAuthCallback) -> None:
+        """Process OAuth callback data.
 
-        Refreshes the token if it has expired.
-        If no tokens are available, an :class:`AuthenticationError` is raised.
+        :param callback: The callback data received.
+        :type callback: :class:`OAuthCallback`
 
-        :return: The access token for the authenticated user.
-        :raises AuthenticationError: If no tokens are available.
+        :raises AuthenticationError: If state verification fails.
         """
-        if not self._auth:
-            raise AuthenticationError("No tokens available.")
+        if callback["state"] != self._state:
+            raise AuthenticationError(
+                "OAuth2 state parameter mismatch, possible CSRF attack?"
+            )
 
-        # TODO: Add token refreshing after expiration.
-        # await ...
+        await self._exchange_code(callback["code"])
 
-        return self._auth["access_token"]
+    async def _exchange_code(self, code: str) -> None:
+        """Exchange authorization code for access token.
 
-    async def _exchange_code(self, code: str, state: None | str) -> None:
-        """Process the callback from the OAuth2 flow.
-
-        :param code: Authorization code from the callback.
+        :param code: Authorization code from callback.
         :type code: str
 
-        :param state: State parameter from the callback.
-        :type state: str
-
-        :raises AuthenticationError: If the state parameter is mismatched.
+        :raises AuthenticationError: If token exchange fails.
         """
-        if state and state != self._state:
-            raise AuthenticationError("OAuth2 state parameter mismatched.")
+        try:
+            response = await self._client.post(
+                f"{self._base_url}/login/oauth2/token",
+                data={
+                    "grant_type": "authorization_code",
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "redirect_uri": self.redirect_uri,
+                    "code": code,
+                },
+            )
 
-        async with AsyncClient() as client:
-            try:
-                # Attempt to exchange the code for an access token.
-                response = await client.post(
-                    f"https://{self.canvas_domain}/login/oauth2/token",
-                    data={
-                        "grant_type": "authorization_code",
-                        "client_id": self.client_id,
-                        "client_secret": self.client_secret,
-                        "redirect_uri": self.redirect_uri,
-                        "code": code,
-                    },
-                )
+            response.raise_for_status()
+            data = cast(TokenResponse, response.json())
 
-                # Raise an exception if the request failed.
-                response.raise_for_status()
-                self._auth = response.json()
-            except HTTPError as e:
-                raise AuthenticationError(f"Token exchange failed: {str(e)}.")
+            expires_at = datetime.now() + timedelta(seconds=data["expires_in"])
+            self._token = OAuthToken(
+                access_token=data["access_token"],
+                refresh_token=data["refresh_token"],
+                expires_at=expires_at,
+                token_type=data["token_type"],
+            )
+
+        except HTTPError as e:
+            raise AuthenticationError(f"Token exchange failed: {str(e)}")
 
     async def _refresh_token(self) -> None:
         """Refresh the access token using the refresh token.
 
-        :raises AuthenticationError: If no refresh token is available.
+        :raises AuthenticationError: If token refresh fails.
         """
-        if not self._auth or "refresh_token" not in self._auth:
-            raise AuthenticationError("No refresh token available.")
+        if not self._token:
+            raise AuthenticationError("No refresh token available")
 
-        async with AsyncClient() as client:
-            try:
-                # Attempt to refresh the access token.
-                response = await client.post(
-                    f"https://{self.canvas_domain}/login/oauth2/token",
-                    data={
-                        "grant_type": "refresh_token",
-                        "client_id": self.client_id,
-                        "client_secret": self.client_secret,
-                        "refresh_token": self._auth["refresh_token"],
-                    },
-                )
+        try:
+            response = await self._client.post(
+                f"{self._base_url}/login/oauth2/token",
+                data={
+                    "grant_type": "refresh_token",
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "refresh_token": self._token.refresh_token,
+                },
+            )
 
-                # Raise an exception if the request failed.
-                response.raise_for_status()
-                self._auth = response.json()
-            except HTTPError as e:
-                raise AuthenticationError(f"Token refresh failed: {str(e)}.")
+            response.raise_for_status()
+            data = cast(TokenResponse, response.json())
+
+            expires_at = datetime.now() + timedelta(seconds=data["expires_in"])
+            self._token = OAuthToken(
+                access_token=data["access_token"],
+                refresh_token=data["refresh_token"],
+                expires_at=expires_at,
+                token_type=data["token_type"],
+            )
+
+        except HTTPError as e:
+            self._token = None  # Clear invalid token.
+            raise AuthenticationError(f"Token refresh failed: {str(e)}")
+
+    async def authenticate(self) -> None:
+        """Start the OAuth2 authentication flow.
+
+        1. Generate and open the authorization URL in a browser.
+        2. Start a local server to receive the callback.
+        3. Exchange the auth code for tokens.
+
+        :raises AuthenticationError: If authentication fails.
+        """
+        auth_url = self._get_auth_url()
+        server = create_server(self._handle_callback)
+
+        # Open browser for auth.
+        if not webbrowser.open(auth_url):
+            print(f"URL to authenticate: {auth_url}")
+
+        # Wait for callback.
+        await server.start()
+
+    async def fetch_token(self) -> str:
+        """Fetch the current access token, refreshing if needed.
+
+        :return: The current access token.
+        :rtype: str
+
+        :raises AuthenticationError: If no token is available.
+        """
+        if not self._token:
+            raise AuthenticationError(
+                "No token available, call authenticate() first"
+            )
+
+        if self._token.is_expired:
+            await self._refresh_token()
+
+        assert self._token is not None
+        return self._token.access_token
+
+    @property
+    def authorized(self) -> bool:
+        """Check if we have a valid token.
+
+        :return: True if we have a non-expired token.
+        :rtype: bool
+        """
+        return bool(self._token and not self._token.is_expired)
+
+    async def close(self) -> None:
+        """Clean up resources."""
+        await self._client.aclose()
