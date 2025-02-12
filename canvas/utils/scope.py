@@ -18,6 +18,8 @@ from __future__ import annotations
 
 from enum import Flag, auto
 
+__all__ = ("CanvasScope",)
+
 
 class CanvasScope(Flag):
     """OAuth2 scopes for Canvas LMS API access.
