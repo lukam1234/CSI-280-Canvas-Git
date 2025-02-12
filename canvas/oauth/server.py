@@ -2,24 +2,6 @@
 ============================
 
 Implements a server for handling OAuth2 authentication with Canvas LMS.
-
-Example
--------
-.. code-block:: python
-
-    auth = CanvasAuth(
-        client_id="YOUR_CLIENT_ID",
-        client_secret="YOUR_CLIENT_SECRET",
-        redirect_uri="http://localhost:8000/callback",
-        canvas_domain="YOUR_CANVAS_DOMAIN",
-        scopes="YOUR_SCOPES",
-    )
-
-    server = CallbackServer(("localhost", 8000), CallbackHandler)
-    code, state = await server.start()
-
-    if code:
-        auth_response = await auth._exchange_code(code, state)
 """
 
 from __future__ import annotations
