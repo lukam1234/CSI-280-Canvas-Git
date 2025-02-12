@@ -8,43 +8,42 @@ Example
 -------
 .. code-block:: python
 
-    scopes = {CanvasScope.SHOW_ACCESS_TOKEN, CanvasScope.USER_INFO}
-    scope_str = CanvasScope.combine_scopes(scopes)
+    required_scopes = (
+        CanvasScope.SHOW_ACCESS_TOKEN |
+        CanvasScope.USER_INFO
+    )
 """
 
 from __future__ import annotations
 
 from enum import Flag, auto
 
-__all__ = ("CanvasScope",)
-
 
 class CanvasScope(Flag):
     """OAuth2 scopes for Canvas LMS API access.
 
     :ivar NONE: No scopes.
-
+    :ivar USER_INFO: Read user information for the authenticated user.
     :ivar SHOW_ACCESS_TOKEN: Read access tokens for the authenticated user.
     :ivar CREATE_ACCESS_TOKEN: Create access tokens for the authenticated user.
     :ivar UPDATE_ACCESS_TOKEN: Update access tokens for the authenticated user.
     :ivar DELETE_ACCESS_TOKEN: Delete access tokens for the authenticated user.
-
-    :ivar USER_INFO: Read user information for the authenticated user.
     """
 
-    # TODO: Add more scopes.
-    NONE = auto()
+    # Base scopes.
+    NONE = 0
 
-    # OAuth2 scopes for Canvas LMS API.
+    # User information scopes.
+    USER_INFO = auto()
+
+    # Token management scopes.
     SHOW_ACCESS_TOKEN = auto()
     CREATE_ACCESS_TOKEN = auto()
     UPDATE_ACCESS_TOKEN = auto()
     DELETE_ACCESS_TOKEN = auto()
 
-    USER_INFO = auto()
-
     @classmethod
-    def from_string(cls, scope: str) -> CanvasScope:
+    def from_str(cls, scope_str: str) -> CanvasScope:
         """Convert a string scope to CanvasScope flag.
 
         :param scope: String representation of scope.
@@ -56,36 +55,32 @@ class CanvasScope(Flag):
         :raises ValueError: If scope string is invalid.
         """
         try:
-            return cls[scope.upper()]
+            return cls[scope_str.upper()]
         except KeyError:
-            raise ValueError(f"Invalid scope: {scope}.")
+            raise ValueError(f"Invalid scope identifier: {scope_str}.")
 
-    def to_str(self) -> str:
-        """Convert flag to Canvas LMS scope string.
+    def __str__(self) -> str:
+        """Convert CanvasScope flag to string.
 
-        :return: Canvas LMS formatted scope string.
+        :return: String representation of CanvasScope flag.
         :rtype: str
         """
         # flake8: noqa
-        scope_map = {
-            CanvasScope.NONE: "",
+        _SCOPE_MAPPING = {
+            CanvasScope.USER_INFO: "/auth/userinfo",
             CanvasScope.SHOW_ACCESS_TOKEN: "url:GET|/api/v1/users/:user_id/tokens/:id",
             CanvasScope.CREATE_ACCESS_TOKEN: "url:POST|/api/v1/users/:user_id/tokens",
             CanvasScope.UPDATE_ACCESS_TOKEN: "url:PUT|/api/v1/users/:user_id/tokens/:id",
             CanvasScope.DELETE_ACCESS_TOKEN: "url:DELETE|/api/v1/users/:user_id/tokens/:id",
-            CanvasScope.USER_INFO: "/auth/userinfo",
         }
 
-        return scope_map.get(self, "")
+        if self == CanvasScope.NONE:
+            return ""
 
-    @staticmethod
-    def combine_scopes(scopes: set[CanvasScope]) -> str:
-        """Combine multiple scope flags into a Canvas scope string.
+        scopes: list[str] = []
+        for scope in CanvasScope:
+            if scope != CanvasScope.NONE and self & scope:
+                if pattern := _SCOPE_MAPPING.get(scope):
+                    scopes.append(pattern)
 
-        :param scopes: Set of CanvasScope flags.
-        :type scopes: set[CanvasScope]
-
-        :return: Combined scope string for Canvas LMS.
-        :rtype: str
-        """
-        return " ".join(scope.to_str() for scope in scopes)
+        return " ".join(scopes)
