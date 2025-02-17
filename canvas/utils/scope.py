@@ -48,8 +48,8 @@ class CanvasScope(Flag):
     def from_str(cls, scope_str: str) -> CanvasScope:
         """Convert a string scope to CanvasScope flag.
 
-        :param scope: String representation of scope.
-        :type scope: str
+        :param scope_str: String representation of scope.
+        :type scope_str: str
 
         :return: Corresponding CanvasScope flag.
         :rtype: CanvasScope
@@ -81,7 +81,7 @@ class CanvasScope(Flag):
 
         scopes: list[str] = []
         for scope in CanvasScope:
-            if scope != CanvasScope.NONE and self & scope:
+            if self & scope:
                 if pattern := _SCOPE_MAPPING.get(scope):
                     scopes.append(pattern)
 

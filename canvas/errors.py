@@ -32,7 +32,7 @@ class APIError(CanvasError):
     :param message: The error message.
     :type message: str
 
-    :param status: HTTP status code from the response>
+    :param status: HTTP status code from the response.
     :type status: int
 
     :param response: Complete API response body.
@@ -44,7 +44,7 @@ class APIError(CanvasError):
     :ivar response: Complete API response body.
     :vartype response: dict[str, Any]
 
-    :ivar message: The error messsage.
+    :ivar message: The error message.
     :vartype message: str
 
     :raises CanvasError: Base Canvas error class.

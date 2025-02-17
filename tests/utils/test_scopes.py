@@ -1,11 +1,11 @@
-from typing import NoReturn
+from __future__ import annotations
 
 import pytest
 
 from canvas import CanvasScope
 
 
-def test_single_str() -> None | NoReturn:
+def test_single_str() -> None:
     """Test string conversion of single scopes."""
     cases = {
         CanvasScope.NONE: "",
@@ -33,7 +33,7 @@ def test_single_str() -> None | NoReturn:
         ),
     ],
 )
-def test_multi_str(scopes: CanvasScope, expected: str) -> None | NoReturn:
+def test_multi_str(scopes: CanvasScope, expected: str) -> None:
     """Test string conversion of combined scopes."""
     assert str(scopes) == expected
 
@@ -49,7 +49,7 @@ def test_multi_str(scopes: CanvasScope, expected: str) -> None | NoReturn:
         ("NONE", CanvasScope.NONE),
     ],
 )
-def test_from_str(scope_str: str, expected: CanvasScope) -> None | NoReturn:
+def test_from_str(scope_str: str, expected: CanvasScope) -> None:
     """Test conversion from string to scope for valid inputs."""
     assert CanvasScope.from_str(scope_str) == expected
     assert CanvasScope.from_str(scope_str.lower()) == expected
@@ -65,13 +65,13 @@ def test_from_str(scope_str: str, expected: CanvasScope) -> None | NoReturn:
         "user info",  # Contains space.
     ],
 )
-def test_invalid_from_str(invalid_scope: str) -> None | NoReturn:
+def test_invalid_from_str(invalid_scope: str) -> None:
     """Test conversion from string fails for invalid inputs."""
     with pytest.raises(ValueError, match="Invalid scope identifier"):
         CanvasScope.from_str(invalid_scope)
 
 
-def test_bitwise_operations() -> None | NoReturn:
+def test_bitwise_operations() -> None:
     """Test bitwise operations between scopes."""
     combined = CanvasScope.SHOW_ACCESS_TOKEN | CanvasScope.USER_INFO
     assert combined & CanvasScope.SHOW_ACCESS_TOKEN
