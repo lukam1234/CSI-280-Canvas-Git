@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from typing import Any
 
-__all__ = ("CanvasError", "AuthenticationError", "APIError")
+__all__ = ("CanvasError", "AuthenticationError", "APIError", "AttributeError")
 
 
 class CanvasError(Exception):
@@ -67,3 +67,7 @@ class APIError(CanvasError):
         super().__init__(message)
         self.status_code = status
         self.response = response
+
+
+class AttributeError(CanvasError):
+    """Raised when an attribute error occurs."""

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # flake8: noqa
 from .errors import *
+from .models import *
 from .oauth import *
 from .utils import *
 
