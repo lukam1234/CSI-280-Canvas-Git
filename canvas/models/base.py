@@ -6,7 +6,7 @@ Implements a base model with serialization and deserialization functionality.
 
 from __future__ import annotations
 
-from typing import cast, Any, TypeVar, get_type_hints
+from typing import Any, TypeVar, cast, get_type_hints
 
 from attrs import asdict, define
 

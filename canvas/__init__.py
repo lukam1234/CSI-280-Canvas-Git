@@ -4,6 +4,7 @@ from __future__ import annotations
 from .errors import *
 from .models import *
 from .oauth import *
+from .rest import *
 from .utils import *
 
 __version__ = "v0.1.0"
