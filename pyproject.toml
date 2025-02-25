@@ -2,7 +2,7 @@
 name = "canvas"
 description = "Canvas CLI tool."
 version = "0.1.0"
-authors = ["EOF-D <END-OFD@pm.me>"] # TODO: Add team members.
+authors = ["EOF-D <END-OFD@pm.me>", "RyanBuck182 <ryanbuck182@gmail.com>"] # TODO: Add team members.
 readme = "README.md"
 license = "MIT" # TODO: Remove placeholder license once decided by team members.
 
