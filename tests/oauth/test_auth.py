@@ -81,22 +81,23 @@ def test_auth_http_error() -> CanvasAuth:
 
 
 @pytest.fixture
-def test_auth_expired() -> CanvasAuth:
-    """CanvasAuth for testing that responds with expired tokens."""
-    auth = CanvasAuth(
-        "test_client_id", "test_client_secret", "test_client_domain"
-    )
-    auth._client = MockAsyncClient(expired_token=True)
-    return auth
-
-
-@pytest.fixture
-def test_oauth_token() -> OAuthToken:
+def test_token() -> OAuthToken:
     """Standard OAuthToken to test for equality"""
     return OAuthToken(
         access_token="test_access_token",
         token_type="test_token_type",
-        expires_at=datetime.datetime.now(),
+        expires_at=datetime.datetime.now() + datetime.timedelta(days=5),
+        refresh_token="test_refresh_token",
+    )
+
+
+@pytest.fixture
+def test_token_expired() -> OAuthToken:
+    """Standard OAuthToken to test for equality"""
+    return OAuthToken(
+        access_token="test_access_token",
+        token_type="test_token_type",
+        expires_at=datetime.datetime.now() - datetime.timedelta(days=5),
         refresh_token="test_refresh_token",
     )
 
@@ -177,15 +178,15 @@ def test_auth_url(auth: CanvasAuth, expected: str) -> None:
 
 @pytest.mark.asyncio
 async def test_exchange_code(
-    test_auth: CanvasAuth, test_oauth_token: OAuthToken
+    test_auth: CanvasAuth, test_token: OAuthToken
 ) -> None:
     """Test exchange code."""
     await test_auth._exchange_code("test_code")
 
     assert test_auth._token is not None
-    assert test_auth._token.access_token == test_oauth_token.access_token
-    assert test_auth._token.token_type == test_oauth_token.token_type
-    assert test_auth._token.refresh_token == test_oauth_token.refresh_token
+    assert test_auth._token.access_token == test_token.access_token
+    assert test_auth._token.token_type == test_token.token_type
+    assert test_auth._token.refresh_token == test_token.refresh_token
 
 
 @pytest.mark.asyncio
@@ -202,16 +203,16 @@ async def test_exchange_code_http_error(
 
 @pytest.mark.asyncio
 async def test_refresh_token(
-    test_auth: CanvasAuth, test_oauth_token: OAuthToken
+    test_auth: CanvasAuth, test_token: OAuthToken
 ) -> None:
     """Test refresh token."""
     await test_auth._exchange_code("test_code")
     await test_auth._refresh_token()
 
     assert test_auth._token is not None
-    assert test_auth._token.access_token == test_oauth_token.access_token
-    assert test_auth._token.token_type == test_oauth_token.token_type
-    assert test_auth._token.refresh_token == test_oauth_token.refresh_token
+    assert test_auth._token.access_token == test_token.access_token
+    assert test_auth._token.token_type == test_token.token_type
+    assert test_auth._token.refresh_token == test_token.refresh_token
 
 
 @pytest.mark.asyncio
@@ -225,10 +226,10 @@ async def test_refresh_token_no_token(test_auth: CanvasAuth) -> None:
 
 @pytest.mark.asyncio
 async def test_refresh_token_http_error(
-    test_auth_http_error: CanvasAuth, test_oauth_token: OAuthToken
+    test_auth_http_error: CanvasAuth, test_token: OAuthToken
 ) -> None:
     """Test refresh token with http error."""
-    test_auth_http_error._token = test_oauth_token
+    test_auth_http_error._token = test_token
     with pytest.raises(
         AuthenticationError, match=f"Token refresh failed: .*test_error_text.*"
     ):
@@ -237,16 +238,16 @@ async def test_refresh_token_http_error(
 
 @pytest.mark.asyncio
 async def test_handle_callback(
-    test_auth: CanvasAuth, test_oauth_token: OAuthToken
+    test_auth: CanvasAuth, test_token: OAuthToken
 ) -> None:
     """Test handle callback."""
     test_callback = OAuthCallback(code="test_code", state=test_auth._state)
     await test_auth._handle_callback(test_callback)
 
     assert test_auth._token is not None
-    assert test_auth._token.access_token == test_oauth_token.access_token
-    assert test_auth._token.token_type == test_oauth_token.token_type
-    assert test_auth._token.refresh_token == test_oauth_token.refresh_token
+    assert test_auth._token.access_token == test_token.access_token
+    assert test_auth._token.token_type == test_token.token_type
+    assert test_auth._token.refresh_token == test_token.refresh_token
 
 
 @pytest.mark.asyncio
@@ -267,30 +268,29 @@ async def test_close(test_auth: CanvasAuth) -> None:
     assert test_auth._client._state == ClientState.CLOSED
 
 
-@pytest.mark.asyncio
-async def test_authorized(test_auth: CanvasAuth) -> None:
+def test_authorized(test_auth: CanvasAuth, test_token: OAuthToken) -> None:
     """Test authorization."""
-    await test_auth._exchange_code("test_code")
+    test_auth._token = test_token
     assert test_auth.authorized
 
 
-@pytest.mark.asyncio
-async def test_authorized_no_token(test_auth: CanvasAuth) -> None:
+def test_authorized_no_token(test_auth: CanvasAuth) -> None:
     """Test authorization without token."""
     assert not test_auth.authorized
 
 
-@pytest.mark.asyncio
-async def test_authorized_expired(test_auth_expired: CanvasAuth) -> None:
+def test_authorized_expired(
+    test_auth: CanvasAuth, test_token_expired: OAuthToken
+) -> None:
     """Test authorization with expired token."""
-    await test_auth_expired._exchange_code("test_code")
-    assert not test_auth_expired.authorized
+    test_auth._token = test_token_expired
+    assert not test_auth.authorized
 
 
 @pytest.mark.asyncio
-async def test_fetch_token(test_auth: CanvasAuth) -> None:
+async def test_fetch_token(test_auth: CanvasAuth, test_token) -> None:
     """Test fetch token."""
-    await test_auth._exchange_code("test_code")
+    test_auth._token = test_token
     assert await test_auth.fetch_token() == "test_access_token"
 
 
@@ -305,7 +305,9 @@ async def test_fetch_token_no_token(test_auth: CanvasAuth) -> None:
 
 
 @pytest.mark.asyncio
-async def test_fetch_token_expired(test_auth_expired: CanvasAuth) -> None:
+async def test_fetch_token_expired(
+    test_auth: CanvasAuth, test_token_expired: OAuthToken
+) -> None:
     """Test fetch token with expired token."""
-    await test_auth_expired._exchange_code("test_code")
-    assert await test_auth_expired.fetch_token() == "test_access_token"
+    test_auth._token = test_token_expired
+    assert await test_auth.fetch_token() == "test_access_token"
