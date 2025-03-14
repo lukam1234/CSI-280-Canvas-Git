@@ -179,4 +179,12 @@ async def test_request(
     """Test api requests."""
     test_client.auth._token = test_token
     test_client._client.request = AsyncMock(return_value=mock_response)
+
+    # Test with given method
     assert await test_client._request(method, endpoint) == expected
+
+    # Test with every method
+    assert await test_client.get(endpoint) == expected
+    assert await test_client.put(endpoint) == expected
+    assert await test_client.post(endpoint) == expected
+    assert await test_client.delete(endpoint) == expected
