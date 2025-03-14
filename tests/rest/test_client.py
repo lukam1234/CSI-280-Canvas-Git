@@ -3,6 +3,9 @@
 
 from __future__ import annotations
 
+from typing import Any
+
+from httpx import Response
 import pytest
 
 from canvas.oauth.auth import CanvasAuth
@@ -66,4 +69,33 @@ def test_client(test_auth: CanvasAuth) -> CanvasAPIClient:
 def test_get_url(
     test_client: CanvasAPIClient, endpoint: str, expected: str
 ) -> None:
+    """Test getting api endpoint url."""
     assert test_client._get_url(endpoint) == expected
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "response,expected_dict",
+    [
+        (Response(200, json={"message": "ok"}), {"message": "ok"}),
+        (
+            Response(202, json={"message": "accepted"}),
+            {"message": "accepted"},
+        ),
+        (
+            Response(200, json={"hello": "goodbye", "sun": "moon"}),
+            {"hello": "goodbye", "sun": "moon"},
+        ),
+        (
+            Response(200, json={"a": [1, 2, 3], "b": {"a": "b"}}),
+            {"a": [1, 2, 3], "b": {"a": "b"}},
+        ),
+    ],
+)
+async def test_process_response(
+    test_client: CanvasAPIClient,
+    response: Response,
+    expected_dict: dict[str, Any],
+) -> None:
+    """Test api response processing."""
+    assert await test_client._process_response(response) == expected_dict
