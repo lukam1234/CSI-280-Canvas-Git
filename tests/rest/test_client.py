@@ -3,13 +3,17 @@
 
 from __future__ import annotations
 
+import datetime
 from typing import Any
+from unittest.mock import AsyncMock
 
 from httpx import Response
 import pytest
 
+from canvas import OAuthToken
 from canvas.oauth.auth import CanvasAuth
 from canvas.rest.client import CanvasAPIClient
+from canvas.errors import APIError
 from tests.test_utils import MockAsyncClient
 
 
@@ -32,6 +36,17 @@ def test_client(test_auth: CanvasAuth) -> CanvasAPIClient:
     )
     client._client = MockAsyncClient()
     return client
+
+
+@pytest.fixture
+def test_token() -> OAuthToken:
+    """Standard OAuthToken to test for equality"""
+    return OAuthToken(
+        access_token="test_access_token",
+        token_type="test_token_type",
+        expires_at=datetime.datetime.now() + datetime.timedelta(days=5),
+        refresh_token="test_refresh_token",
+    )
 
 
 @pytest.mark.parametrize(
@@ -75,7 +90,7 @@ def test_get_url(
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "response,expected_dict",
+    "response,expected",
     [
         (Response(200, json={"message": "ok"}), {"message": "ok"}),
         (
@@ -90,12 +105,78 @@ def test_get_url(
             Response(200, json={"a": [1, 2, 3], "b": {"a": "b"}}),
             {"a": [1, 2, 3], "b": {"a": "b"}},
         ),
+        (
+            Response(200, json={"a": [1, 2, 3], "b": {"a": "b"}}),
+            {"a": [1, 2, 3], "b": {"a": "b"}},
+        ),
+        (
+            Response(200),
+            {},
+        ),
     ],
 )
 async def test_process_response(
     test_client: CanvasAPIClient,
     response: Response,
-    expected_dict: dict[str, Any],
+    expected: dict[str, Any],
 ) -> None:
     """Test api response processing."""
-    assert await test_client._process_response(response) == expected_dict
+    assert await test_client._process_response(response) == expected
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "response,expected",
+    [
+        (Response(302, json={"message": "redirect"}), "redirect"),
+        (Response(404, json={"message": "not found"}), "not found"),
+        (Response(403, json={"message": "forbidden", "a": "b"}), "forbidden"),
+        (Response(400), "API request failed."),
+    ],
+)
+async def test_process_response_failure(
+    test_client: CanvasAPIClient,
+    response: Response,
+    expected: str,
+) -> None:
+    """Test api response processing on failure."""
+    with pytest.raises(APIError, match=expected):
+        await test_client._process_response(response)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "method,endpoint,mock_response,expected",
+    [
+        (
+            "GET",
+            "test",
+            Response(200, json={"message": "test"}),
+            {"message": "test"},
+        ),
+        (
+            "POST",
+            "/test/a",
+            Response(202, json={"test": "test"}),
+            {"test": "test"},
+        ),
+        (
+            "DELETE",
+            "test/a",
+            Response(204, json={"test2": "test2"}),
+            {"test2": "test2"},
+        ),
+    ],
+)
+async def test_request(
+    test_client: CanvasAPIClient,
+    test_token: OAuthToken,
+    method: str,
+    endpoint: str,
+    mock_response: Response,
+    expected: dict[str, Any],
+) -> None:
+    """Test api requests."""
+    test_client.auth._token = test_token
+    test_client._client.request = AsyncMock(return_value=mock_response)
+    assert await test_client._request(method, endpoint) == expected
