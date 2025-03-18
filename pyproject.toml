@@ -2,7 +2,7 @@
 name = "canvas"
 description = "Canvas CLI tool."
 version = "0.1.0"
-authors = ["EOF-D <END-OFD@pm.me>"] # TODO: Add team members.
+authors = ["EOF-D <END-OFD@pm.me>", "RyanBuck182 <ryanbuck182@gmail.com>"] # TODO: Add team members.
 readme = "README.md"
 license = "MIT" # TODO: Remove placeholder license once decided by team members.
 
@@ -12,14 +12,40 @@ packages = [{include = "canvas"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+attrs = "^25.1.0"
+httpx = "^0.28.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"
 isort = "^5.13.2"
 pre-commit = "^4.1.0"
+pytest = "^8.3.4"
+pytest-cov = "^6.0.0"
+pytest-asyncio = "^0.25.3"
+coverage = "^7.6.12"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 79
 
 [tool.pyright]
 typeCheckingMode = "strict"
+
+[tool.flake8]
+exclude = "tests"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v --cov=canvas --cov-report=term-missing"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.coverage.run]
+source = ["canvas"]
+branch = true
 
 [build-system]
 requires = ["poetry-core"]
