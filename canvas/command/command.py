@@ -17,6 +17,8 @@ __all__ = (
     "get_parser",
     "CanvasCommand",
     "InitCommand",
+    "CommandNotFoundException",
+    "NotCanvasCourseException",
 )
 
 
@@ -52,18 +54,12 @@ class CanvasCommand(ABC):
         """Find the root directory of the course."""
         curr_dir = Path.cwd().absolute()
 
-        def canvas_dir_found():
-            return (curr_dir / ".canvas").exists()
-
-        def reached_root():
-            return curr_dir == Path.root
-
         # Search through parent directories for .canvas folder
-        while not canvas_dir_found():
+        while not (curr_dir / ".canvas").exists():
             curr_dir = curr_dir.parent
 
-            # If root reached, command not run from within course
-            if reached_root():
+            # If root reached, command wasn't run from within course
+            if curr_dir == curr_dir.parent:
                 raise NotCanvasCourseException
 
         return curr_dir
