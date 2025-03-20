@@ -15,7 +15,13 @@ from __future__ import annotations
 
 from typing import Any
 
-__all__ = ("CanvasError", "AuthenticationError", "APIError", "AttributeError")
+__all__ = (
+    "CanvasError",
+    "AuthenticationError",
+    "APIError",
+    "AttributeError",
+    "CLIError",
+)
 
 
 class CanvasError(Exception):
@@ -71,3 +77,7 @@ class APIError(CanvasError):
 
 class AttributeError(CanvasError):
     """Raised when an attribute error occurs."""
+
+
+class CLIError(CanvasError):
+    """Raised when an error with the command line occurs."""
