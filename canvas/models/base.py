@@ -8,8 +8,9 @@ from __future__ import annotations
 
 from typing import Any, TypeVar, cast, get_type_hints
 
-from attrs import asdict, define
+from attrs import asdict, define, field
 
+from ..rest import CanvasAPIClient
 from ..errors import AttributeError
 
 T = TypeVar("T", bound="Model")
@@ -21,8 +22,12 @@ __all__ = ("Model",)
 class Model:
     """Base model class."""
 
+    client: CanvasAPIClient = field()
+
     @classmethod
-    def from_json(cls: type[T], data: dict[str, Any]) -> T:
+    def from_json(
+        cls: type[T], client: CanvasAPIClient, data: dict[str, Any]
+    ) -> T:
         """Create a model instance from a JSON.
 
         :param data: JSON data to create the model from.
@@ -46,12 +51,12 @@ class Model:
             value = data[field_name]
             if isinstance(value, dict) and issubclass(field_type, Model):
                 value = field_type.from_json(
-                    cast(dict[str, Any], data[field_name])
+                    client, cast(dict[str, Any], data[field_name])
                 )
 
             kwargs[field_name] = value
 
-        return cls(**kwargs)
+        return cls(client, **kwargs)
 
     def to_json(self) -> dict[str, Any]:
         """Convert the model instance to a JSON.
