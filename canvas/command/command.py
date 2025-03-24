@@ -1,4 +1,4 @@
-"""Canvas git command.
+"""Canvas LMS Git Commands.
 ============================
 
 Implements commands for the CLI.
@@ -9,6 +9,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from .. import __version__
+from ..rest import CanvasAPIClient
 from ..errors import CLIError
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
@@ -37,21 +38,33 @@ class CanvasCommand(ABC):
     """Canvas git command which can be executed."""
 
     @classmethod
-    def from_args(cls, args: Namespace):
+    def from_args(
+        cls, args: Namespace, client: CanvasAPIClient
+    ) -> CanvasCommand:
         """Create command instance from command args.
 
-        :param args: The command args.
+        :param args: Command args.
         :type args: Namespace
+
+        :param client: API client for when API calls are needed.
+        :type client: CanvasAPIClient
+
+        :return: Command created from the given args that can be executed.
+        :rtype: CanvasCommand
         """
         match args.command:
             case "init":
-                return InitCommand(args)
+                return InitCommand(args, client)
             case _:
                 raise CommandNotFoundException
 
     @classmethod
     def find_course_root(cls) -> Path:
-        """Find the root directory of the course."""
+        """Find the root directory of the course.
+
+        :return: Path to the course's root directory (contains .canvas).
+        :rtype: Path
+        """
         curr_dir = Path.cwd().absolute()
 
         # Search through parent directories for .canvas folder
@@ -65,7 +78,7 @@ class CanvasCommand(ABC):
         return curr_dir
 
     @abstractmethod
-    def execute(self):
+    def execute(self) -> None:
         """Execute the command."""
         pass
 
@@ -73,15 +86,18 @@ class CanvasCommand(ABC):
 class InitCommand(CanvasCommand):
     """Command to initialize a canvas course."""
 
-    def __init__(self, args):
+    def __init__(self, args: Namespace, client: CanvasAPIClient) -> None:
         """Create init command instance from args.
 
-        :param args: The command args.
+        :param args: Command args.
         :type args: Namespace
+
+        :param client: API client for when API calls are needed.
+        :type client: CanvasAPIClient
         """
         pass
 
-    def execute(self):
+    def execute(self) -> None:
         """Execute the command."""
         pass
 

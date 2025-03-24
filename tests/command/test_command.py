@@ -7,37 +7,47 @@ import os
 from shutil import rmtree
 from pathlib import Path
 from argparse import Namespace
+from unittest.mock import Mock
 
 import pytest
 
+from canvas.rest import CanvasAPIClient
 from canvas.command import *
 
 
 @pytest.fixture
-def init_command() -> InitCommand:
+def mock_client() -> CanvasAPIClient:
+    return Mock(spec=CanvasAPIClient)
+
+
+@pytest.fixture
+def init_command(mock_client: CanvasAPIClient) -> InitCommand:
     """Init command."""
     return InitCommand(
         Namespace(
             command="init", course_url="https://example.com/courses/1234567"
-        )
+        ),
+        mock_client,
     )
 
 
-def test_from_args_init() -> None:
+def test_from_args_init(mock_client: CanvasAPIClient) -> None:
     """Test creating CanvasCommand from args."""
     init_args = Namespace(
         command="init", course_url="https://example.com/courses/1234567"
     )
 
-    assert isinstance(CanvasCommand.from_args(init_args), InitCommand)
+    assert isinstance(
+        CanvasCommand.from_args(init_args, mock_client), InitCommand
+    )
 
 
-def test_from_args_fail() -> None:
+def test_from_args_fail(mock_client: CanvasAPIClient) -> None:
     """Test creating CanvasCommand from invalid args."""
     invalid_args = Namespace(command="fake-command")
 
     with pytest.raises(CommandNotFoundException):
-        CanvasCommand.from_args(invalid_args)
+        CanvasCommand.from_args(invalid_args, mock_client)
 
 
 def test_find_course_root_success(init_command: InitCommand) -> None:
