@@ -12,7 +12,9 @@ from unittest.mock import Mock
 import pytest
 
 from canvas.rest import CanvasAPIClient
-from canvas.command import *
+from canvas.command.base import NotCanvasCourseException
+from canvas.command.init import InitCommand
+from canvas.command.factory import CommandFactory, CommandNotFoundException
 
 
 @pytest.fixture
@@ -38,7 +40,7 @@ def test_from_args_init(mock_client: CanvasAPIClient) -> None:
     )
 
     assert isinstance(
-        CanvasCommand.from_args(init_args, mock_client), InitCommand
+        CommandFactory.from_args(init_args, mock_client), InitCommand
     )
 
 
@@ -47,7 +49,7 @@ def test_from_args_fail(mock_client: CanvasAPIClient) -> None:
     invalid_args = Namespace(command="fake-command")
 
     with pytest.raises(CommandNotFoundException):
-        CanvasCommand.from_args(invalid_args, mock_client)
+        CommandFactory.from_args(invalid_args, mock_client)
 
 
 def test_find_course_root_success(init_command: InitCommand) -> None:

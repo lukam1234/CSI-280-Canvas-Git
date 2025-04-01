@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from command.command import get_parser, CanvasCommand
+from command.factory import CommandFactory
+from command.parse import get_parser
 
 
 def main() -> None:
@@ -15,7 +16,7 @@ def main() -> None:
         return
 
     # Run the command
-    cmd = CanvasCommand.from_args(args)
+    cmd = CommandFactory.from_args(args)  # pyright: ignore reportCallIssue
     cmd.execute()
 
 
