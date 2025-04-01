@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from command.factory import CommandFactory
-from command.parse import get_parser
+from .command.factory import CommandFactory
+from .command.parse import get_parser
 
 
 def main() -> None:
@@ -16,7 +16,9 @@ def main() -> None:
         return
 
     # Run the command
-    cmd = CommandFactory.from_args(args)  # pyright: ignore reportCallIssue
+    cmd = CommandFactory.from_args(
+        args, None  # pyright: ignore reportArgumentType
+    )
     cmd.execute()
 
 
