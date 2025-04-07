@@ -6,7 +6,7 @@ from canvas import ANSIBuilder, Mode, Color
 
 
 def test_context_manager() -> None:
-    """ "Test the context manager for ANSIBuilder."""
+    """Test the context manager for ANSIBuilder."""
     with ANSIBuilder() as builder:
         builder("foo")
         builder("bar")

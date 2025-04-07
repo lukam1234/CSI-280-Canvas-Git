@@ -35,7 +35,7 @@ class Color(tuple[int, int], Enum):
     """Holds all supported ANSI colors.
 
     Each enum contains a tuple of two elements, the first being
-    the forground color code, and the second being the background color code.
+    the foreground color code, and the second being the background color code.
 
     :ivar BLACK: The black color code.
     :ivar RED: The red color code.
@@ -125,5 +125,5 @@ class ANSIBuilder:
 
     @property
     def text(self) -> str:
-        """ "Gets the text of the builder."""
+        """Gets the text of the builder."""
         return "".join(self.lines)
