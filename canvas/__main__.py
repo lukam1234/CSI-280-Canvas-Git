@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from .command.factory import CommandFactory
 from .command.parse import get_parser
+from .rest.client import CanvasAPIClient
+from .oauth.auth import CanvasAuth
+from .utils import CanvasScope
 
 
 def main() -> None:
@@ -15,9 +18,22 @@ def main() -> None:
         parser.print_help()
         return
 
+    scopes = (
+        CanvasScope.SHOW_ACCESS_TOKEN
+        | CanvasScope.CREATE_ACCESS_TOKEN
+        | CanvasScope.UPDATE_ACCESS_TOKEN
+        | CanvasScope.DELETE_ACCESS_TOKEN
+    )
+
+    authentication = CanvasAuth(
+        "PLACEHOLDER", "PLACEHOLDER", "eof-d.codes", scopes=scopes
+    )
+
+    client = CanvasAPIClient(authentication)
+
     # Run the command
     cmd = CommandFactory.from_args(
-        args, None  # pyright: ignore reportArgumentType
+        args, client  # pyright: ignore reportArgumentType
     )
     cmd.execute()
 
