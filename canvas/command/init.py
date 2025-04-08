@@ -28,11 +28,35 @@ class InitCommand(CanvasCommand):
         :param client: API client for when API calls are needed.
         :type client: CanvasAPIClient
         """
-        self.course_url = args.course_url
-        self.course_name = "COURSE_NAME"
+        self.client = client
+        self.course_id = args.course_id
 
-    def execute(self) -> None:
+    async def _clone_course(self) -> None:
+        """Get the course data from the API."""
+        # Use data models!!!!!!!!!!!!!!!!!!!!!
+        course_info = await self.client.get(
+            f"/api/v1/courses/{self.course_id}"
+        )
+        self.course_name = self._format_name(course_info["name"])
+
+        # there's no way to indicate that the api returns a list
+
+        self.modules = await self.client.get(
+            f"/api/v1/courses/{self.course_id}/modules"
+        )
+
+        # self.module_names = map(
+        #     self._format_name, [mod["name"] for mod in self.modules]
+        # )
+
+    def _format_name(self, name):
+        return "".join(x for x in name if x.isalnum())
+
+    async def execute(self) -> None:
         """Execute the command."""
+        # Get course info from client
+        await self._clone_course()
+
         curr_dir = Path.cwd().absolute()
         course_dir = curr_dir / self.course_name
         canvas_dir = course_dir / ".canvas"
@@ -49,5 +73,5 @@ class InitCommand(CanvasCommand):
         # Create modules folder
         modules_dir = course_dir / "modules"
         os.makedirs(modules_dir, exist_ok=True)
-        os.makedirs(modules_dir / "module-1", exist_ok=True)
-        os.makedirs(modules_dir / "module-2", exist_ok=True)
+        # for module in self.module_names:
+        #     os.makedirs(modules_dir / module, exist_ok=True)

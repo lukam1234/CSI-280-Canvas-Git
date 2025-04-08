@@ -34,7 +34,7 @@ def get_parser() -> ArgumentParser:
     # Subparser for each command
     init_parser = subparser.add_parser("init", help="Initialize the course")
     init_parser.add_argument(
-        "-c", "--course_url", help="Url of the canvas course to download"
+        "-c", "--course_id", help="ID of the canvas course to download"
     )
 
     return parser

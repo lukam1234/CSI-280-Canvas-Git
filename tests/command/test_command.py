@@ -26,18 +26,14 @@ def mock_client() -> CanvasAPIClient:
 def init_command(mock_client: CanvasAPIClient) -> InitCommand:
     """Init command."""
     return InitCommand(
-        Namespace(
-            command="init", course_url="https://example.com/courses/1234567"
-        ),
+        Namespace(command="init", course_id="1"),
         mock_client,
     )
 
 
 def test_from_args_init(mock_client: CanvasAPIClient) -> None:
     """Test creating CanvasCommand from args."""
-    init_args = Namespace(
-        command="init", course_url="https://example.com/courses/1234567"
-    )
+    init_args = Namespace(command="init", course_id="1")
 
     assert isinstance(
         CommandFactory.from_args(init_args, mock_client), InitCommand
