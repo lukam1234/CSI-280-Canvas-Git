@@ -23,6 +23,10 @@ def main() -> None:
         | CanvasScope.CREATE_ACCESS_TOKEN
         | CanvasScope.UPDATE_ACCESS_TOKEN
         | CanvasScope.DELETE_ACCESS_TOKEN
+        | CanvasScope.GET_COURSE
+        | CanvasScope.GET_MODULE
+        | CanvasScope.LIST_COURSES
+        | CanvasScope.LIST_MODULES
     )
 
     authentication = CanvasAuth(

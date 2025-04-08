@@ -43,6 +43,10 @@ class CanvasScope(Flag):
     CREATE_ACCESS_TOKEN = auto()
     UPDATE_ACCESS_TOKEN = auto()
     DELETE_ACCESS_TOKEN = auto()
+    LIST_COURSES = auto()
+    GET_COURSE = auto()
+    LIST_MODULES = auto()
+    GET_MODULE = auto()
 
     @classmethod
     def from_str(cls, scope_str: str) -> CanvasScope:
@@ -74,6 +78,10 @@ class CanvasScope(Flag):
             CanvasScope.CREATE_ACCESS_TOKEN: "url:POST|/api/v1/users/:user_id/tokens",
             CanvasScope.UPDATE_ACCESS_TOKEN: "url:PUT|/api/v1/users/:user_id/tokens/:id",
             CanvasScope.DELETE_ACCESS_TOKEN: "url:DELETE|/api/v1/users/:user_id/tokens/:id",
+            CanvasScope.LIST_COURSES: "url:GET|/api/v1/users/:user_id/courses",
+            CanvasScope.GET_COURSE: "url:GET|/api/v1/accounts/:account_id/courses/:id",
+            CanvasScope.LIST_MODULES: "url:GET|/api/v1/courses/:course_id/modules",
+            CanvasScope.GET_MODULE: "url:GET|/api/v1/courses/:course_id/modules/:id",
         }
 
         if self == CanvasScope.NONE:
