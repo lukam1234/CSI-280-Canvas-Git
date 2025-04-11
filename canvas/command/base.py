@@ -47,6 +47,6 @@ class CanvasCommand(ABC):
         return curr_dir
 
     @abstractmethod
-    async def execute(self) -> None:
+    def execute(self) -> None:
         """Execute the command."""
         pass

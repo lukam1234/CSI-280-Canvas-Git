@@ -6,11 +6,12 @@ Implements init command for the CLI.
 
 from __future__ import annotations
 
-from argparse import Namespace
 import os
+from argparse import Namespace
 from pathlib import Path
+from canvasapi import Canvas
+from canvasapi.user import User
 
-from ..rest import CanvasAPIClient
 from .base import CanvasCommand
 
 __all__ = ("InitCommand",)
@@ -19,46 +20,43 @@ __all__ = ("InitCommand",)
 class InitCommand(CanvasCommand):
     """Command to initialize a canvas course."""
 
-    def __init__(self, args: Namespace, client: CanvasAPIClient) -> None:
+    def __init__(self, args: Namespace, client: Canvas, user: User) -> None:
         """Create init command instance from args.
 
         :param args: Command args.
         :type args: Namespace
 
         :param client: API client for when API calls are needed.
-        :type client: CanvasAPIClient
+        :type client: Canvas
+
+        :param client: User for API calls.
+        :type client: User
         """
         self.client = client
+        self.user = user
         self.course_id = args.course_id
 
-    async def _clone_course(self) -> None:
+    def _clone_course(self) -> None:
         """Get the course data from the API."""
-        # Use data models!!!!!!!!!!!!!!!!!!!!!
-        course_info = await self.client.get(
-            f"/api/v1/courses/{self.course_id}"
-        )
-        self.course_name = self._format_name(course_info["name"])
-
-        # there's no way to indicate that the api returns a list
-
-        self.modules = await self.client.get(
-            f"/api/v1/courses/{self.course_id}/modules"
-        )
-
-        # self.module_names = map(
-        #     self._format_name, [mod["name"] for mod in self.modules]
-        # )
+        self.course = self.client.get_course(self.course_id)
+        # if course_id not supplied, show them list and ask them to choose
 
     def _format_name(self, name):
         return "".join(x for x in name if x.isalnum())
 
-    async def execute(self) -> None:
+    def execute(self) -> None:
         """Execute the command."""
+        if self.course_id is None:
+            print("--course_id flag is required")
+            exit()
+
+        print("Initializing course...")
+
         # Get course info from client
-        await self._clone_course()
+        self._clone_course()
 
         curr_dir = Path.cwd().absolute()
-        course_dir = curr_dir / self.course_name
+        course_dir = curr_dir / self._format_name(self.course.name)
         canvas_dir = course_dir / ".canvas"
 
         # Create .canvas folder
@@ -71,7 +69,29 @@ class InitCommand(CanvasCommand):
         open(f"{canvas_dir}/metadata.json", "a").close()
 
         # Create modules folder
+        print("Downloading modules...")
         modules_dir = course_dir / "modules"
         os.makedirs(modules_dir, exist_ok=True)
-        # for module in self.module_names:
-        #     os.makedirs(modules_dir / module, exist_ok=True)
+        for module in self.course.get_modules():
+            # Create module folder
+            module_dir = modules_dir / self._format_name(module.name)
+            os.makedirs(module_dir, exist_ok=True)
+            # Download assignments & files
+            for item in module.get_module_items():
+                if item.type == "Assignment":
+                    # Create assignment and .info folder
+                    assignment_dir = module_dir / self._format_name(item.title)
+                    info_dir = assignment_dir / ".info"
+                    os.makedirs(assignment_dir, exist_ok=True)
+                    os.makedirs(info_dir, exist_ok=True)
+
+                    # Download description
+                    assignment = self.course.get_assignment(item.content_id)
+                    with open(info_dir / "description.md", "w") as desc:
+                        desc.write(assignment.description)
+                if item.type == "File":
+                    # Download file
+                    file = self.course.get_file(item.content_id)
+                    file.download(str(module_dir / file.display_name))
+
+        print(f"Course initialized at {course_dir}\n")

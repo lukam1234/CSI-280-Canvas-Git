@@ -8,7 +8,9 @@ from __future__ import annotations
 
 from argparse import Namespace
 
-from ..rest import CanvasAPIClient
+from canvasapi import Canvas
+from canvasapi.user import User
+
 from ..errors import CLIError
 from .base import CanvasCommand
 from .init import InitCommand
@@ -25,7 +27,7 @@ class CommandFactory:
 
     @classmethod
     def from_args(
-        cls, args: Namespace, client: CanvasAPIClient
+        cls, args: Namespace, client: Canvas, user: User
     ) -> CanvasCommand:
         """Create command instance from command args.
 
@@ -33,13 +35,16 @@ class CommandFactory:
         :type args: Namespace
 
         :param client: API client for when API calls are needed.
-        :type client: CanvasAPIClient
+        :type client: Canvas
+
+        :param user: API user.
+        :type user: User
 
         :return: Command created from the given args that can be executed.
         :rtype: CanvasCommand
         """
         match args.command:
             case "init":
-                return InitCommand(args, client)
+                return InitCommand(args, client, user)
             case _:
                 raise CommandNotFoundException

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import os
+from canvasapi import Canvas
+from dotenv import load_dotenv
+
 from .command.factory import CommandFactory
 from .command.parse import get_parser
-from .rest.client import CanvasAPIClient
-from .oauth.auth import CanvasAuth
-from .utils import CanvasScope
 
 
 def main() -> None:
@@ -18,29 +19,19 @@ def main() -> None:
         parser.print_help()
         return
 
-    scopes = (
-        CanvasScope.SHOW_ACCESS_TOKEN
-        | CanvasScope.CREATE_ACCESS_TOKEN
-        | CanvasScope.UPDATE_ACCESS_TOKEN
-        | CanvasScope.DELETE_ACCESS_TOKEN
-        | CanvasScope.GET_COURSE
-        | CanvasScope.GET_MODULE
-        | CanvasScope.LIST_COURSES
-        | CanvasScope.LIST_MODULES
-    )
+    API_URL = os.getenv("API_URL")
+    API_KEY = os.getenv("API_KEY")
 
-    authentication = CanvasAuth(
-        "PLACEHOLDER", "PLACEHOLDER", "eof-d.codes", scopes=scopes
-    )
-
-    client = CanvasAPIClient(authentication)
+    client = Canvas(API_URL, API_KEY)
+    user = client.get_current_user()
 
     # Run the command
     cmd = CommandFactory.from_args(
-        args, client  # pyright: ignore reportArgumentType
+        args, client, user  # pyright: ignore reportArgumentType
     )
     cmd.execute()
 
 
 if __name__ == "__main__":
+    load_dotenv()
     main()
