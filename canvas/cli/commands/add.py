@@ -18,7 +18,7 @@ __all__ = ("AddCommand",)
 
 
 class AddCommand(CanvasCommand):
-    """Command to submit an assignment."""
+    """Command to stage a file for submission."""
 
     def __init__(self, args: Namespace, client: Canvas) -> None:
         """Create command instance from args.
@@ -47,7 +47,7 @@ class AddCommand(CanvasCommand):
         # Get currently staged and append the new path
         with open(staged_file, "r") as f:
             staged = json.load(f)
-        staged.append(str(file_to_stage))
+        staged.append(str(file_to_stage.absolute()))
         with open(staged_file, "w") as f:
             json.dump(staged, f)
 
