@@ -86,8 +86,9 @@ class InitCommand(CanvasCommand):
 
                     # Download description
                     assignment = self.course.get_assignment(item.content_id)
-                    with open(info_dir / "description.md", "w") as desc:
-                        desc.write(assignment.description)
+                    (info_dir / "description.md").write_text(
+                        assignment.description
+                    )
                 if item.type == "File":
                     # Download file
                     file = self.course.get_file(item.content_id)
