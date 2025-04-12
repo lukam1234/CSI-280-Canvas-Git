@@ -38,10 +38,12 @@ def get_parser() -> ArgumentParser:
     )
 
     add_cmd_parser = subparser.add_parser(
-        "add", help="Add a file to be tracked"
+        "add", help="Add a file to be staged"
     )
     add_cmd_parser.add_argument(
-        "-f", "--file_path", help="Path of the file to be tracked"
+        "-f", "--file_path", help="Path of the file to be staged"
     )
+
+    subparser.add_parser("status", help="Check the status of staged files")
 
     return parser

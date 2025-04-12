@@ -10,10 +10,11 @@ from argparse import Namespace
 
 from canvasapi import Canvas
 
+from .commands.init import InitCommand
 from .commands.add import AddCommand
+from .commands.status import StatusCommand
 from ..errors import CLIError
 from .base import CanvasCommand
-from canvas.cli.commands.init import InitCommand
 
 __all__ = ("CommandFactory", "CommandNotFoundException")
 
@@ -43,5 +44,7 @@ class CommandFactory:
                 return InitCommand(args, client)
             case "add":
                 return AddCommand(args, client)
+            case "status":
+                return StatusCommand(args, client)
             case _:
                 raise CommandNotFoundException
