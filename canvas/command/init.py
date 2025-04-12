@@ -9,7 +9,6 @@ from __future__ import annotations
 from argparse import Namespace
 from pathlib import Path
 from canvasapi import Canvas
-from canvasapi.user import User
 
 from .base import CanvasCommand
 
@@ -19,7 +18,7 @@ __all__ = ("InitCommand",)
 class InitCommand(CanvasCommand):
     """Command to initialize a canvas course."""
 
-    def __init__(self, args: Namespace, client: Canvas, user: User) -> None:
+    def __init__(self, args: Namespace, client: Canvas) -> None:
         """Create init command instance from args.
 
         :param args: Command args.
@@ -27,12 +26,8 @@ class InitCommand(CanvasCommand):
 
         :param client: API client for when API calls are needed.
         :type client: Canvas
-
-        :param client: User for API calls.
-        :type client: User
         """
         self.client = client
-        self.user = user
         self.course_id = args.course_id
 
     def _clone_course(self) -> None:

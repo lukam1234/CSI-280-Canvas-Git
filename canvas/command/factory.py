@@ -9,7 +9,6 @@ from __future__ import annotations
 from argparse import Namespace
 
 from canvasapi import Canvas
-from canvasapi.user import User
 
 from ..errors import CLIError
 from .base import CanvasCommand
@@ -26,9 +25,7 @@ class CommandFactory:
     """Canvas git command builder."""
 
     @classmethod
-    def from_args(
-        cls, args: Namespace, client: Canvas, user: User
-    ) -> CanvasCommand:
+    def from_args(cls, args: Namespace, client: Canvas) -> CanvasCommand:
         """Create command instance from command args.
 
         :param args: Command args.
@@ -37,14 +34,11 @@ class CommandFactory:
         :param client: API client for when API calls are needed.
         :type client: Canvas
 
-        :param user: API user.
-        :type user: User
-
         :return: Command created from the given args that can be executed.
         :rtype: CanvasCommand
         """
         match args.command:
             case "init":
-                return InitCommand(args, client, user)
+                return InitCommand(args, client)
             case _:
                 raise CommandNotFoundException

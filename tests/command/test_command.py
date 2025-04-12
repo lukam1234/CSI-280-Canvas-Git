@@ -29,29 +29,27 @@ def mock_user() -> User:
 
 
 @pytest.fixture
-def init_command(mock_client: Canvas, mock_user: User) -> InitCommand:
+def init_command(mock_client: Canvas) -> InitCommand:
     """Init command."""
-    return InitCommand(
-        Namespace(command="init", course_id="1"), mock_client, mock_user
-    )
+    return InitCommand(Namespace(command="init", course_id="1"), mock_client)
 
 
-def test_from_args_init(mock_client: Canvas, mock_user: User) -> None:
+def test_from_args_init(mock_client: Canvas) -> None:
     """Test creating CanvasCommand from args."""
     init_args = Namespace(command="init", course_id="1")
 
     assert isinstance(
-        CommandFactory.from_args(init_args, mock_client, mock_user),
+        CommandFactory.from_args(init_args, mock_client),
         InitCommand,
     )
 
 
-def test_from_args_fail(mock_client: Canvas, mock_user: User) -> None:
+def test_from_args_fail(mock_client: Canvas) -> None:
     """Test creating CanvasCommand from invalid args."""
     invalid_args = Namespace(command="fake-command")
 
     with pytest.raises(CommandNotFoundException):
-        CommandFactory.from_args(invalid_args, mock_client, mock_user)
+        CommandFactory.from_args(invalid_args, mock_client)
 
 
 def test_find_course_root_success(init_command: InitCommand) -> None:

@@ -23,11 +23,10 @@ def main() -> None:
     API_KEY = os.getenv("API_KEY")
 
     client = Canvas(API_URL, API_KEY)
-    user = client.get_current_user()
 
     # Run the command
     cmd = CommandFactory.from_args(
-        args, client, user  # pyright: ignore reportArgumentType
+        args, client  # pyright: ignore reportArgumentType
     )
     cmd.execute()
 
