@@ -10,6 +10,7 @@ from argparse import Namespace
 
 from canvasapi import Canvas
 
+from .commands.add import AddCommand
 from ..errors import CLIError
 from .base import CanvasCommand
 from canvas.cli.commands.init import InitCommand
@@ -40,5 +41,7 @@ class CommandFactory:
         match args.command:
             case "init":
                 return InitCommand(args, client)
+            case "add":
+                return AddCommand(args, client)
             case _:
                 raise CommandNotFoundException

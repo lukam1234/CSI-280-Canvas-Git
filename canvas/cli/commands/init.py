@@ -62,7 +62,7 @@ class InitCommand(CanvasCommand):
 
         # Create modules folder
         print("Downloading modules...")
-        modules_dir = course_dir / "modules"
+        modules_dir = course_dir / "Modules"
         modules_dir.mkdir(parents=True, exist_ok=True)
         for module in self.course.get_modules():
             # Create module folder
@@ -114,7 +114,7 @@ class InitCommand(CanvasCommand):
         with open(metadata_file, "w") as f:
             json.dump(metadata, f)
         with open(staged_file, "w") as f:
-            json.dump({}, f)
+            json.dump([], f)
         with open(config_file, "w") as f:
             json.dump({}, f)
         with open(token_file, "w") as f:

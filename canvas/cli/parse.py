@@ -37,4 +37,11 @@ def get_parser() -> ArgumentParser:
         "-c", "--course_id", help="ID of the canvas course to download"
     )
 
+    add_cmd_parser = subparser.add_parser(
+        "add", help="Add a file to be tracked"
+    )
+    add_cmd_parser.add_argument(
+        "-f", "--file_path", help="Path of the file to be tracked"
+    )
+
     return parser
