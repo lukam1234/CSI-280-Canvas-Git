@@ -6,6 +6,7 @@ Implements init command for the CLI.
 
 from __future__ import annotations
 
+import json
 from argparse import Namespace
 from pathlib import Path
 from canvasapi import Canvas
@@ -46,21 +47,18 @@ class InitCommand(CanvasCommand):
 
         print("Initializing course...")
 
-        # Get course info from client
         self._clone_course()
+        metadata = {"course_id": self.course_id}
 
         curr_dir = Path.cwd().absolute()
         course_dir = curr_dir / self._format_name(self.course.name)
-        canvas_dir = course_dir / ".canvas"
 
-        # Create .canvas folder
-        canvas_dir.mkdir(parents=True, exist_ok=True)
-
-        # Create files in .canvas folder
-        (canvas_dir / "config.json").touch(exist_ok=True)
-        (canvas_dir / "token.json").touch(exist_ok=True)
-        (canvas_dir / "staged.json").touch(exist_ok=True)
-        (canvas_dir / "metadata.json").touch(exist_ok=True)
+        if course_dir.exists():
+            print(
+                "Course has already been initialized in this directory."
+                "\nDelete the course files or initialize somewhere else."
+            )
+            exit()
 
         # Create modules folder
         print("Downloading modules...")
@@ -70,9 +68,17 @@ class InitCommand(CanvasCommand):
             # Create module folder
             module_dir = modules_dir / self._format_name(module.name)
             module_dir.mkdir(parents=True, exist_ok=True)
+
+            # Add module metadata
+            metadata[str(module_dir)] = {
+                "type": "module",
+                "id": module.id,
+            }
+
             # Download assignments & files
             for item in module.get_module_items():
                 if item.type == "Assignment":
+
                     # Create assignment and .info folder
                     assignment_dir = module_dir / self._format_name(item.title)
                     info_dir = assignment_dir / ".info"
@@ -81,12 +87,37 @@ class InitCommand(CanvasCommand):
 
                     # Download description
                     assignment = self.course.get_assignment(item.content_id)
-                    (info_dir / "description.md").write_text(
-                        assignment.description
-                    )
+                    description_file = info_dir / "description.md"
+                    description_file.write_text(assignment.description)
+
+                    # Add assignment metadata
+                    metadata[str(assignment_dir)] = {
+                        "type": "assignment",
+                        "id": item.content_id,
+                    }
+
                 if item.type == "File":
                     # Download file
                     file = self.course.get_file(item.content_id)
                     file.download(str(module_dir / file.display_name))
+
+        # Create .canvas folder
+        canvas_dir = course_dir / ".canvas"
+        canvas_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create files in .canvas folder
+        metadata_file = canvas_dir / "metadata.json"
+        staged_file = canvas_dir / "staged.json"
+        config_file = canvas_dir / "config.json"
+        token_file = canvas_dir / "token.json"
+
+        with open(metadata_file, "w") as f:
+            json.dump(metadata, f)
+        with open(staged_file, "w") as f:
+            json.dump({}, f)
+        with open(config_file, "w") as f:
+            json.dump({}, f)
+        with open(token_file, "w") as f:
+            json.dump({}, f)
 
         print(f"Course initialized at {course_dir}\n")
