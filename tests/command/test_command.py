@@ -13,9 +13,9 @@ import pytest
 from canvasapi import Canvas
 from canvasapi.user import User
 
-from canvas.command.base import NotCanvasCourseException
-from canvas.command.init import InitCommand
-from canvas.command.factory import CommandFactory, CommandNotFoundException
+from canvas.cli.base import NotCanvasCourseException
+from canvas.cli.commands.init import InitCommand
+from canvas.cli.factory import CommandFactory, CommandNotFoundException
 
 
 @pytest.fixture

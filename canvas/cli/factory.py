@@ -12,7 +12,7 @@ from canvasapi import Canvas
 
 from ..errors import CLIError
 from .base import CanvasCommand
-from .init import InitCommand
+from canvas.cli.commands.init import InitCommand
 
 __all__ = ("CommandFactory", "CommandNotFoundException")
 

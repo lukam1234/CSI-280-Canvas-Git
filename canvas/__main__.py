@@ -4,8 +4,8 @@ import os
 from canvasapi import Canvas
 from dotenv import load_dotenv
 
-from .command.factory import CommandFactory
-from .command.parse import get_parser
+from .cli.factory import CommandFactory
+from .cli.parse import get_parser
 
 
 def main() -> None:

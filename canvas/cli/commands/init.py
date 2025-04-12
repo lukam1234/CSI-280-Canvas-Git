@@ -10,7 +10,7 @@ from argparse import Namespace
 from pathlib import Path
 from canvasapi import Canvas
 
-from .base import CanvasCommand
+from canvas.cli.base import CanvasCommand
 
 __all__ = ("InitCommand",)
 
