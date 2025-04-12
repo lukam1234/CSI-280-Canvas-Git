@@ -6,7 +6,6 @@ Implements init command for the CLI.
 
 from __future__ import annotations
 
-import os
 from argparse import Namespace
 from pathlib import Path
 from canvasapi import Canvas
@@ -60,30 +59,30 @@ class InitCommand(CanvasCommand):
         canvas_dir = course_dir / ".canvas"
 
         # Create .canvas folder
-        os.makedirs(canvas_dir, exist_ok=True)
+        canvas_dir.mkdir(parents=True, exist_ok=True)
 
         # Create files in .canvas folder
-        open(f"{canvas_dir}/config.json", "a").close()
-        open(f"{canvas_dir}/token.json", "a").close()
-        open(f"{canvas_dir}/staged.json", "a").close()
-        open(f"{canvas_dir}/metadata.json", "a").close()
+        (canvas_dir / "config.json").touch(exist_ok=True)
+        (canvas_dir / "token.json").touch(exist_ok=True)
+        (canvas_dir / "staged.json").touch(exist_ok=True)
+        (canvas_dir / "metadata.json").touch(exist_ok=True)
 
         # Create modules folder
         print("Downloading modules...")
         modules_dir = course_dir / "modules"
-        os.makedirs(modules_dir, exist_ok=True)
+        modules_dir.mkdir(parents=True, exist_ok=True)
         for module in self.course.get_modules():
             # Create module folder
             module_dir = modules_dir / self._format_name(module.name)
-            os.makedirs(module_dir, exist_ok=True)
+            module_dir.mkdir(parents=True, exist_ok=True)
             # Download assignments & files
             for item in module.get_module_items():
                 if item.type == "Assignment":
                     # Create assignment and .info folder
                     assignment_dir = module_dir / self._format_name(item.title)
                     info_dir = assignment_dir / ".info"
-                    os.makedirs(assignment_dir, exist_ok=True)
-                    os.makedirs(info_dir, exist_ok=True)
+                    assignment_dir.mkdir(parents=True, exist_ok=True)
+                    info_dir.mkdir(parents=True, exist_ok=True)
 
                     # Download description
                     assignment = self.course.get_assignment(item.content_id)
