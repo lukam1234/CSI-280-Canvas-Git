@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from argparse import Namespace
 from pathlib import Path
+
 from canvasapi import Canvas
 
 from .base import CanvasCommand

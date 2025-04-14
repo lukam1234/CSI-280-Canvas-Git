@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+
 from canvasapi import Canvas
 from dotenv import load_dotenv
 
