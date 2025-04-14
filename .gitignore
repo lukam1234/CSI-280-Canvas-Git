@@ -175,3 +175,5 @@ cython_debug/
 
 # pyright config
 pyrightconfig.json
+
+CSI280Testing/
