@@ -131,7 +131,7 @@ class InitCommand(CanvasCommand):
         self.course = self.client.get_course(self.course_id)
 
         # Determine course folder
-        curr_dir = Path.cwd().resolve()
+        curr_dir = CanvasCommand.get_current_dir()
         course_dir = curr_dir / self._format_filename(self.course.name)
 
         # If the course was already cloned, exit

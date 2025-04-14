@@ -34,7 +34,7 @@ class AddCommand(CanvasCommand):
 
     def execute(self) -> None:
         """Execute the command."""
-        curr_dir = Path.cwd().resolve()
+        curr_dir = CanvasCommand.get_current_dir()
         file_to_stage = Path(self.file_path).resolve()
 
         # Exit if the file doesn't exist

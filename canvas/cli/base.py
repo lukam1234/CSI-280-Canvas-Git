@@ -30,13 +30,17 @@ class CanvasCommand(ABC):
     """Canvas git command which can be executed."""
 
     @classmethod
+    def get_current_dir(cls) -> Path:
+        return Path.cwd().resolve()
+
+    @classmethod
     def get_course_root(cls) -> Path:
         """Find the root directory of the course.
 
         :return: Path to the course's root directory (contains .canvas).
         :rtype: Path
         """
-        curr_dir = Path.cwd().absolute()
+        curr_dir = cls.get_current_dir()
 
         # Search through parent directories for .canvas folder
         while not (curr_dir / ".canvas").exists():
@@ -46,7 +50,7 @@ class CanvasCommand(ABC):
             if curr_dir == curr_dir.parent:
                 raise NotCanvasCourseException
 
-        return curr_dir
+        return curr_dir.resolve()
 
     @classmethod
     def get_course_canvas_dir(cls) -> Path:
