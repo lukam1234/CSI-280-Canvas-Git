@@ -14,6 +14,7 @@ from . import CanvasCommand
 from .init import InitCommand
 from .stage import StageCommand
 from .status import StatusCommand
+from .unstage import UnstageCommand
 from ..errors import CLIError
 from .. import __version__
 
@@ -30,6 +31,7 @@ class CommandManager:
     COMMANDS = {
         "init": InitCommand,
         "stage": StageCommand,
+        "unstage": UnstageCommand,
         "status": StatusCommand,
     }
 
@@ -59,12 +61,20 @@ class CommandManager:
             "-c", "--course_id", help="ID of the canvas course to download"
         )
 
-        # Add command
-        add_cmd_parser = subparser.add_parser(
+        # Stage command
+        stage_parser = subparser.add_parser(
             "stage", help="Stage a file to be submitted"
         )
-        add_cmd_parser.add_argument(
-            "-f", "--file_path", help="Path of the file to be staged"
+        stage_parser.add_argument(
+            "file_path", help="Path of the file to be staged"
+        )
+
+        # Unstage command
+        unstage_parser = subparser.add_parser(
+            "unstage", help="Stage a file to be submitted"
+        )
+        unstage_parser.add_argument(
+            "file_path", help="Path of the file to be unstaged"
         )
 
         # Status command

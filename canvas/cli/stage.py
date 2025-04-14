@@ -80,7 +80,7 @@ class StageCommand(CanvasCommand):
             print(
                 "Cannot stage files for multiple assignments at the same time."
                 "The specified file\nis in the folder of a separate assignment"
-                "than previously staged files. Move the\nfile to the same"
+                " than previously staged files. Move\nthe file to the same"
                 "assignment folder as previously staged files or unstage the\n"
                 "currently staged files and try staging again."
             )
