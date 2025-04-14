@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 from argparse import Namespace
+from pathlib import Path
 
 from canvasapi import Canvas
 
@@ -33,14 +34,19 @@ class StatusCommand(CanvasCommand):
     def execute(self) -> None:
         """Execute the command."""
         root = self.get_course_root()
+
+        # Read staged files
         staged_file = root / ".canvas" / "staged.json"
         with open(staged_file, "r") as f:
             staged = json.load(f)
 
+        # Print special message if no files are staged
         if not staged:
             print("No files are currently staged.")
             exit()
 
+        # Print all staged files
+        curr_dir = Path.cwd().resolve()
         print("Currently staged:")
         for file in staged:
-            print(f"\t{file}")
+            print(f"\t{Path(file).relative_to(curr_dir)}")
