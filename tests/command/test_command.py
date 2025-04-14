@@ -14,7 +14,7 @@ from canvasapi import Canvas
 from canvasapi.user import User
 
 from canvas.cli.base import NotCanvasCourseException
-from canvas.cli.commands.init import InitCommand
+from canvas.cli.init import InitCommand
 from canvas.cli.manager import CommandManager, CommandNotFoundException
 
 

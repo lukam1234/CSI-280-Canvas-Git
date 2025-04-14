@@ -11,9 +11,9 @@ from argparse import Namespace, ArgumentParser
 from canvasapi import Canvas
 
 from . import CanvasCommand
-from .commands import InitCommand
-from .commands.add import AddCommand
-from .commands.status import StatusCommand
+from .init import InitCommand
+from .add import AddCommand
+from .status import StatusCommand
 from ..errors import CLIError
 from .. import __version__
 
