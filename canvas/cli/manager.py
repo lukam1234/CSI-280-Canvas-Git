@@ -12,7 +12,7 @@ from canvasapi import Canvas
 
 from . import CanvasCommand
 from .init import InitCommand
-from .add import AddCommand
+from .stage import StageCommand
 from .status import StatusCommand
 from ..errors import CLIError
 from .. import __version__
@@ -29,7 +29,7 @@ class CommandManager:
 
     COMMANDS = {
         "init": InitCommand,
-        "add": AddCommand,
+        "stage": StageCommand,
         "status": StatusCommand,
     }
 
@@ -61,7 +61,7 @@ class CommandManager:
 
         # Add command
         add_cmd_parser = subparser.add_parser(
-            "add", help="Add a file to be staged"
+            "stage", help="Stage a file to be submitted"
         )
         add_cmd_parser.add_argument(
             "-f", "--file_path", help="Path of the file to be staged"

@@ -14,10 +14,10 @@ from canvasapi import Canvas
 
 from canvas.cli.base import CanvasCommand, NotCanvasCourseException
 
-__all__ = ("AddCommand",)
+__all__ = ("StageCommand",)
 
 
-class AddCommand(CanvasCommand):
+class StageCommand(CanvasCommand):
     """Command to stage a file for submission."""
 
     def __init__(self, args: Namespace, client: Canvas) -> None:
