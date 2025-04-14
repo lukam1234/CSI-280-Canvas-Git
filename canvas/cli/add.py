@@ -12,7 +12,7 @@ from pathlib import Path
 
 from canvasapi import Canvas
 
-from canvas.cli.base import CanvasCommand
+from canvas.cli.base import CanvasCommand, NotCanvasCourseException
 
 __all__ = ("AddCommand",)
 
@@ -34,21 +34,63 @@ class AddCommand(CanvasCommand):
 
     def execute(self) -> None:
         """Execute the command."""
-        file_to_stage = Path(self.file_path)
+        curr_dir = Path.cwd().resolve()
+        file_to_stage = Path(self.file_path).resolve()
+
+        # Exit if the file doesn't exist
         if not file_to_stage.exists():
-            print(str(file_to_stage), "does not exist.")
+            print(str(file_to_stage.relative_to(curr_dir)), "does not exist.")
             exit()
 
-        print(f"Staging {str(file_to_stage)}")
+        print(f"Staging {str(file_to_stage.relative_to(curr_dir))}")
 
-        root = self.get_course_root()
+        # Ensure command is run from within course
+        try:
+            root = self.get_course_root()
+        except NotCanvasCourseException:
+            print("Must be run from inside a canvas course.")
+            exit()
+
+        # Read currently staged paths
         staged_file = root / ".canvas" / "staged.json"
-
-        # Get currently staged and append the new path
         with open(staged_file, "r") as f:
             staged = json.load(f)
-        staged.append(str(file_to_stage.absolute()))
+
+        # Exit if already staged
+        if str(file_to_stage) in staged:
+            print(
+                str(file_to_stage.relative_to(curr_dir)), "is already staged."
+            )
+            exit()
+
+        # Exit if outside an assignment folder
+        if (
+            self.find_first_tracked_parent(file_to_stage)[1]["type"]
+            != "assignment"
+        ):
+            print("Staging assignment is ambiguous in this context.")
+            print("Move your file into an assignment's folder.")
+            exit()
+
+        # Exit if assignment folders vary between staged files
+        if staged and (
+            self.find_first_tracked_parent(file_to_stage)[0]
+            != self.find_first_tracked_parent(Path(staged[0]))[0]
+        ):
+            print(
+                "Cannot stage files for multiple assignments at the same time."
+                "The specified file\nis in the folder of a separate assignment"
+                "than previously staged files. Move the\nfile to the same"
+                "assignment folder as previously staged files or unstage the\n"
+                "currently staged files and try staging again."
+            )
+            exit()
+
+        # Write staged file paths with new one appended
+        staged.append(str(file_to_stage))
         with open(staged_file, "w") as f:
             json.dump(staged, f)
 
-        print(f"Staging complete for {str(file_to_stage)}")
+        print(
+            f"Staging complete for {str(file_to_stage.relative_to(curr_dir))}"
+        )
