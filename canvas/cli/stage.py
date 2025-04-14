@@ -1,7 +1,7 @@
-"""Canvas LMS Add Command.
+"""Canvas LMS Stage Command.
 ============================
 
-Implements add command for the CLI.
+Implements stage command for the CLI.
 """
 
 from __future__ import annotations
