@@ -41,7 +41,7 @@ class AddCommand(CanvasCommand):
 
         print(f"Staging {str(file_to_stage)}")
 
-        root = self.find_course_root()
+        root = self.get_course_root()
         staged_file = root / ".canvas" / "staged.json"
 
         # Get currently staged and append the new path

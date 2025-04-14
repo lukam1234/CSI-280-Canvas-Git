@@ -32,7 +32,7 @@ class StatusCommand(CanvasCommand):
 
     def execute(self) -> None:
         """Execute the command."""
-        root = self.find_course_root()
+        root = self.get_course_root()
         staged_file = root / ".canvas" / "staged.json"
         with open(staged_file, "r") as f:
             staged = json.load(f)

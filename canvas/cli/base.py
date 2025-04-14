@@ -30,7 +30,7 @@ class CanvasCommand(ABC):
     """Canvas git command which can be executed."""
 
     @classmethod
-    def find_course_root(cls) -> Path:
+    def get_course_root(cls) -> Path:
         """Find the root directory of the course.
 
         :return: Path to the course's root directory (contains .canvas).
@@ -49,10 +49,18 @@ class CanvasCommand(ABC):
         return curr_dir
 
     @classmethod
-    def get_metadata(cls, key: str) -> Any:
-        root = cls.find_course_root()
+    def get_course_canvas_dir(cls) -> Path:
+        """Find the .canvas directory of the course.
 
-        canvas_folder = root / ".canvas"
+        :return: Path to the course's .canvas directory.
+        :rtype: Path
+        """
+        return cls.get_course_root() / ".canvas"
+
+    @classmethod
+    def get_metadata(cls, key: str) -> Any:
+        canvas_folder = cls.get_course_canvas_dir()
+
         metadata_file = canvas_folder / "metadata.json"
 
         with open(metadata_file, "r") as f:
@@ -68,7 +76,7 @@ class CanvasCommand(ABC):
         tracked = None
         while tracked is None:
             path = path.parent
-            tracked = cls.get_metadata(str(path))
+            tracked = cls.get_metadata(str(path.absolute()))
 
         return path, tracked
 
