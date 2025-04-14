@@ -34,10 +34,9 @@ class UnstageCommand(CanvasCommand):
 
     def execute(self) -> None:
         """Execute the command."""
-        curr_dir = CanvasCommand.get_current_dir()
         file_to_stage = Path(self.file_path).resolve()
 
-        print(f"Unstaging {str(file_to_stage.relative_to(curr_dir))}")
+        print(f"Unstaging {str(CanvasCommand.get_rel_path(file_to_stage))}")
 
         # Ensure command is run from within course
         try:
@@ -53,7 +52,10 @@ class UnstageCommand(CanvasCommand):
 
         # Exit if not already staged
         if str(file_to_stage) not in staged:
-            print(str(file_to_stage.relative_to(curr_dir)), "is not staged.")
+            print(
+                str(CanvasCommand.get_rel_path(file_to_stage)),
+                "is not staged.",
+            )
             exit()
 
         # Write staged file paths with the specified file unstaged
@@ -63,5 +65,5 @@ class UnstageCommand(CanvasCommand):
 
         print(
             "Unstaging complete for "
-            + str(file_to_stage.relative_to(curr_dir))
+            + str(CanvasCommand.get_rel_path(file_to_stage))
         )
