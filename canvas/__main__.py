@@ -10,7 +10,7 @@ from canvas.cli.manager import CommandManager
 def main() -> None:
     """The main entry point for the CLI."""
 
-    parser = CommandManager.get_parser()
+    parser = CommandManager.get_command_parser()
     args = parser.parse_args()
 
     # Print help if no arguments are passed.
@@ -23,7 +23,7 @@ def main() -> None:
     client = Canvas(API_URL, API_KEY)
 
     # Run the command
-    cmd = CommandManager.from_args(
+    cmd = CommandManager.get_command(
         args, client  # pyright: ignore reportArgumentType
     )
     cmd.execute()

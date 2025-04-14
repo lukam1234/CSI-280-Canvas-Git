@@ -17,7 +17,7 @@ from .commands.status import StatusCommand
 from ..errors import CLIError
 from .. import __version__
 
-__all__ = ("CommandManager",)
+__all__ = ("CommandManager", "CommandNotFoundException")
 
 
 class CommandNotFoundException(CLIError):
@@ -25,7 +25,7 @@ class CommandNotFoundException(CLIError):
 
 
 class CommandManager:
-    """Canvas command manager for parsing/building commands."""
+    """Manages canvas command building and parsing."""
 
     COMMANDS = {
         "init": InitCommand,
@@ -34,7 +34,7 @@ class CommandManager:
     }
 
     @classmethod
-    def get_parser(cls):
+    def get_command_parser(cls) -> ArgumentParser:
         """Creates the argument parser for the CLI.
 
         :return: The `ArgumentParser` with the necessary arguments.
@@ -73,7 +73,7 @@ class CommandManager:
         return parser
 
     @classmethod
-    def from_args(cls, args: Namespace, client: Canvas) -> CanvasCommand:
+    def get_command(cls, args: Namespace, client: Canvas) -> CanvasCommand:
         """Create command instance from command args.
 
         :param args: Command args.

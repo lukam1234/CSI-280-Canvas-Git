@@ -34,22 +34,22 @@ def init_command(mock_client: Canvas) -> InitCommand:
     return InitCommand(Namespace(command="init", course_id="1"), mock_client)
 
 
-def test_from_args_init(mock_client: Canvas) -> None:
+def test_get_command_init(mock_client: Canvas) -> None:
     """Test creating CanvasCommand from args."""
     init_args = Namespace(command="init", course_id="1")
 
     assert isinstance(
-        CommandManager.from_args(init_args, mock_client),
+        CommandManager.get_command(init_args, mock_client),
         InitCommand,
     )
 
 
-def test_from_args_fail(mock_client: Canvas) -> None:
+def test_get_command_fail(mock_client: Canvas) -> None:
     """Test creating CanvasCommand from invalid args."""
     invalid_args = Namespace(command="fake-command")
 
     with pytest.raises(CommandNotFoundException):
-        CommandManager.from_args(invalid_args, mock_client)
+        CommandManager.get_command(invalid_args, mock_client)
 
 
 def test_find_course_root_success(init_command: InitCommand) -> None:
