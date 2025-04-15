@@ -6,6 +6,8 @@ Implements the base command for the CLI.
 
 from __future__ import annotations
 
+import json
+from typing import Any
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -45,6 +47,30 @@ class CanvasCommand(ABC):
                 raise NotCanvasCourseException
 
         return curr_dir
+
+    @classmethod
+    def get_metadata(cls, key: str) -> Any:
+        root = cls.find_course_root()
+
+        canvas_folder = root / ".canvas"
+        metadata_file = canvas_folder / "metadata.json"
+
+        with open(metadata_file, "r") as f:
+            metadata = json.load(f)
+
+        if key in metadata:
+            return metadata[key]
+
+        return None
+
+    @classmethod
+    def find_first_tracked_parent(cls, path: Path) -> tuple[Path, Any]:
+        tracked = None
+        while tracked is None:
+            path = path.parent
+            tracked = cls.get_metadata(str(path))
+
+        return path, tracked
 
     @abstractmethod
     def execute(self) -> None:

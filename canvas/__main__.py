@@ -8,9 +8,8 @@ from dotenv import load_dotenv
 
 from canvas import CanvasScope
 from .oauth import CanvasAuth
-from .command.factory import CommandFactory
-from .command.parse import get_parser
-
+from .cli.factory import CommandFactory
+from .cli.parse import get_parser
 
 async def main() -> None:
     """The main entry point for the CLI."""
