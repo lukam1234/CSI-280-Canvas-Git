@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 from argparse import Namespace
 from pathlib import Path
+
 from canvasapi import Canvas
 
 from canvas.cli.base import CanvasCommand
