@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import os
+import asyncio
+
 from canvasapi import Canvas
 from dotenv import load_dotenv
 
+from canvas import CanvasScope
+from .oauth import CanvasAuth
 from canvas.cli.manager import CommandManager
 
-
-def main() -> None:
+async def main() -> None:
     """The main entry point for the CLI."""
 
     parser = CommandManager.get_command_parser()
@@ -18,9 +21,25 @@ def main() -> None:
         parser.print_help()
         return
 
+    scopes = (
+        CanvasScope.SHOW_ACCESS_TOKEN
+        | CanvasScope.CREATE_ACCESS_TOKEN
+        | CanvasScope.UPDATE_ACCESS_TOKEN
+        | CanvasScope.DELETE_ACCESS_TOKEN
+    )
+
+    auth = CanvasAuth(
+        client_id=os.getenv("CLIENT_ID"),
+        client_secret=os.getenv("CLIENT_SECRET"),
+        canvas_domain="eof-d.codes",
+        scopes=scopes,
+    )
+
+    await auth.authenticate()
+    token = await auth.fetch_token()
+    
     API_URL = os.getenv("API_URL")
-    API_KEY = os.getenv("API_KEY")
-    client = Canvas(API_URL, API_KEY)
+    client = Canvas(API_URL, token)
 
     # Run the command
     cmd = CommandManager.get_command(
@@ -31,4 +50,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     load_dotenv()
-    main()
+    asyncio.run(main())
