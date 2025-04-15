@@ -13,8 +13,9 @@ from canvasapi import Canvas
 from . import CanvasCommand
 from .init import InitCommand
 from .stage import StageCommand
-from .status import StatusCommand
 from .unstage import UnstageCommand
+from .status import StatusCommand
+from .submit import SubmitCommand
 from ..errors import CLIError
 from .. import __version__
 
@@ -33,6 +34,7 @@ class CommandManager:
         "stage": StageCommand,
         "unstage": UnstageCommand,
         "status": StatusCommand,
+        "submit": SubmitCommand,
     }
 
     @classmethod
@@ -79,6 +81,11 @@ class CommandManager:
 
         # Status command
         subparser.add_parser("status", help="Check the status of staged files")
+
+        # Submit command
+        subparser.add_parser(
+            "submit", help="Submit the currently staged files"
+        )
 
         return parser
 
