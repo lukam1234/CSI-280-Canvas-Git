@@ -8,13 +8,12 @@ from dotenv import load_dotenv
 
 from canvas import CanvasScope
 from .oauth import CanvasAuth
-from .cli.factory import CommandFactory
-from .cli.parse import get_parser
+from canvas.cli.manager import CommandManager
 
 async def main() -> None:
     """The main entry point for the CLI."""
 
-    parser = get_parser()
+    parser = CommandManager.get_command_parser()
     args = parser.parse_args()
 
     # Print help if no arguments are passed.
@@ -43,7 +42,7 @@ async def main() -> None:
     client = Canvas(API_URL, token)
 
     # Run the command
-    cmd = CommandFactory.from_args(
+    cmd = CommandManager.get_command(
         args, client  # pyright: ignore reportArgumentType
     )
     cmd.execute()

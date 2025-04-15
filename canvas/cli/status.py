@@ -1,7 +1,7 @@
-"""Canvas LMS Add Command.
+"""Canvas LMS Status Command.
 ============================
 
-Implements add command for the CLI.
+Implements status command for the CLI.
 """
 
 from __future__ import annotations
@@ -14,11 +14,11 @@ from canvasapi import Canvas
 
 from canvas.cli.base import CanvasCommand
 
-__all__ = ("AddCommand",)
+__all__ = ("StatusCommand",)
 
 
-class AddCommand(CanvasCommand):
-    """Command to stage a file for submission."""
+class StatusCommand(CanvasCommand):
+    """Command to check the status of staged files."""
 
     def __init__(self, args: Namespace, client: Canvas) -> None:
         """Create command instance from args.
@@ -30,25 +30,23 @@ class AddCommand(CanvasCommand):
         :type client: Canvas
         """
         self.client = client
-        self.file_path = args.file_path
 
     def execute(self) -> None:
         """Execute the command."""
-        file_to_stage = Path(self.file_path)
-        if not file_to_stage.exists():
-            print(str(file_to_stage), "does not exist.")
-            exit()
+        root = self.get_course_root()
 
-        print(f"Staging {str(file_to_stage)}")
-
-        root = self.find_course_root()
+        # Read staged files
         staged_file = root / ".canvas" / "staged.json"
-
-        # Get currently staged and append the new path
         with open(staged_file, "r") as f:
             staged = json.load(f)
-        staged.append(str(file_to_stage.absolute()))
-        with open(staged_file, "w") as f:
-            json.dump(staged, f)
 
-        print(f"Staging complete for {str(file_to_stage)}")
+        # Print special message if no files are staged
+        if not staged:
+            print("No files are currently staged.")
+            exit()
+
+        # Print all staged files
+        curr_dir = CanvasCommand.get_current_dir()
+        print("Currently staged:")
+        for file in staged:
+            print(f"\t{Path(file).relative_to(curr_dir)}")
