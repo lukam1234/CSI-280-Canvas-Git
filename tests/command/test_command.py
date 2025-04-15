@@ -10,41 +10,41 @@ from argparse import Namespace
 from unittest.mock import Mock
 
 import pytest
+from canvasapi import Canvas
+from canvasapi.user import User
 
-from canvas.rest import CanvasAPIClient
 from canvas.command.base import NotCanvasCourseException
 from canvas.command.init import InitCommand
 from canvas.command.factory import CommandFactory, CommandNotFoundException
 
 
 @pytest.fixture
-def mock_client() -> CanvasAPIClient:
-    return Mock(spec=CanvasAPIClient)
+def mock_client() -> Canvas:
+    return Mock(spec=Canvas)
 
 
 @pytest.fixture
-def init_command(mock_client: CanvasAPIClient) -> InitCommand:
+def mock_user() -> User:
+    return Mock(spec=User)
+
+
+@pytest.fixture
+def init_command(mock_client: Canvas) -> InitCommand:
     """Init command."""
-    return InitCommand(
-        Namespace(
-            command="init", course_url="https://example.com/courses/1234567"
-        ),
-        mock_client,
-    )
+    return InitCommand(Namespace(command="init", course_id="1"), mock_client)
 
 
-def test_from_args_init(mock_client: CanvasAPIClient) -> None:
+def test_from_args_init(mock_client: Canvas) -> None:
     """Test creating CanvasCommand from args."""
-    init_args = Namespace(
-        command="init", course_url="https://example.com/courses/1234567"
-    )
+    init_args = Namespace(command="init", course_id="1")
 
     assert isinstance(
-        CommandFactory.from_args(init_args, mock_client), InitCommand
+        CommandFactory.from_args(init_args, mock_client),
+        InitCommand,
     )
 
 
-def test_from_args_fail(mock_client: CanvasAPIClient) -> None:
+def test_from_args_fail(mock_client: Canvas) -> None:
     """Test creating CanvasCommand from invalid args."""
     invalid_args = Namespace(command="fake-command")
 

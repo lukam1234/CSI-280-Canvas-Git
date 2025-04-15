@@ -14,6 +14,8 @@ packages = [{include = "canvas"}]
 python = "^3.12"
 attrs = "^25.1.0"
 httpx = "^0.28.1"
+canvasapi = "^3.3.0"
+dotenv = "^0.9.9"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"

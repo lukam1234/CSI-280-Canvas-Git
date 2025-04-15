@@ -1,7 +1,12 @@
 from __future__ import annotations
 
-from command.factory import CommandFactory
-from command.parse import get_parser
+import os
+
+from canvasapi import Canvas
+from dotenv import load_dotenv
+
+from .command.factory import CommandFactory
+from .command.parse import get_parser
 
 
 def main() -> None:
@@ -15,10 +20,18 @@ def main() -> None:
         parser.print_help()
         return
 
+    API_URL = os.getenv("API_URL")
+    API_KEY = os.getenv("API_KEY")
+
+    client = Canvas(API_URL, API_KEY)
+
     # Run the command
-    cmd = CommandFactory.from_args(args)  # pyright: ignore reportCallIssue
+    cmd = CommandFactory.from_args(
+        args, client  # pyright: ignore reportArgumentType
+    )
     cmd.execute()
 
 
 if __name__ == "__main__":
+    load_dotenv()
     main()
