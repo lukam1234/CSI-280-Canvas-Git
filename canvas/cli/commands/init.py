@@ -121,4 +121,4 @@ class InitCommand(CanvasCommand):
         with open(token_file, "w") as f:
             json.dump({}, f)
 
-        print(f"Course initialized at {course_dir}\n")
+        print(f"Course initialized at {course_dir}")
