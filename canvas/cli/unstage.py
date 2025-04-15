@@ -43,7 +43,7 @@ class UnstageCommand(CanvasCommand):
             root = self.get_course_root()
         except NotCanvasCourseException:
             print("Must be run from inside a canvas course.")
-            exit()
+            return
 
         # Read currently staged paths
         staged_file = root / ".canvas" / "staged.json"
@@ -56,7 +56,7 @@ class UnstageCommand(CanvasCommand):
                 str(CanvasCommand.get_rel_path(file_to_stage)),
                 "is not staged.",
             )
-            exit()
+            return
 
         # Write staged file paths with the specified file unstaged
         staged.remove(str(file_to_stage))
