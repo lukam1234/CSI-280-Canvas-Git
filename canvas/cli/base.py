@@ -34,6 +34,10 @@ class CanvasCommand(ABC):
         return Path.cwd().resolve()
 
     @classmethod
+    def get_rel_path(cls, path: Path) -> Path:
+        return path.relative_to(cls.get_current_dir(), walk_up=True)
+
+    @classmethod
     def get_course_root(cls) -> Path:
         """Find the root directory of the course.
 

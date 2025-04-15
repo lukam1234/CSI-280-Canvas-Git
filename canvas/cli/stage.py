@@ -34,15 +34,17 @@ class StageCommand(CanvasCommand):
 
     def execute(self) -> None:
         """Execute the command."""
-        curr_dir = CanvasCommand.get_current_dir()
         file_to_stage = Path(self.file_path).resolve()
 
         # Exit if the file doesn't exist
         if not file_to_stage.exists():
-            print(str(file_to_stage.relative_to(curr_dir)), "does not exist.")
+            print(
+                str(CanvasCommand.get_rel_path(file_to_stage)),
+                "does not exist.",
+            )
             exit()
 
-        print(f"Staging {str(file_to_stage.relative_to(curr_dir))}")
+        print(f"Staging {str(CanvasCommand.get_rel_path(file_to_stage))}")
 
         # Ensure command is run from within course
         try:
@@ -59,7 +61,8 @@ class StageCommand(CanvasCommand):
         # Exit if already staged
         if str(file_to_stage) in staged:
             print(
-                str(file_to_stage.relative_to(curr_dir)), "is already staged."
+                str(CanvasCommand.get_rel_path(file_to_stage)),
+                "is already staged.",
             )
             exit()
 
@@ -80,7 +83,7 @@ class StageCommand(CanvasCommand):
             print(
                 "Cannot stage files for multiple assignments at the same time."
                 "The specified file\nis in the folder of a separate assignment"
-                "than previously staged files. Move the\nfile to the same"
+                " than previously staged files. Move\nthe file to the same"
                 "assignment folder as previously staged files or unstage the\n"
                 "currently staged files and try staging again."
             )
@@ -92,5 +95,6 @@ class StageCommand(CanvasCommand):
             json.dump(staged, f)
 
         print(
-            f"Staging complete for {str(file_to_stage.relative_to(curr_dir))}"
+            "Staging complete for",
+            str(CanvasCommand.get_rel_path(file_to_stage)),
         )

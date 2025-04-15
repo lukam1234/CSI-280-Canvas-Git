@@ -46,7 +46,6 @@ class StatusCommand(CanvasCommand):
             exit()
 
         # Print all staged files
-        curr_dir = CanvasCommand.get_current_dir()
         print("Currently staged:")
         for file in staged:
-            print(f"\t{Path(file).relative_to(curr_dir)}")
+            print(f"\t{CanvasCommand.get_rel_path(Path(file))}")
