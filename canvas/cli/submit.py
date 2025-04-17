@@ -56,16 +56,18 @@ class SubmitCommand(CanvasCommand):
         course_id = self.get_metadata("course_id")
         course = self.client.get_course(course_id)
 
-        # Upload files
-        file_ids = []
-        for file_path in staged:
-            file = course.upload(file_path)[1]
-            file_ids.append(file["id"])
-
         # Get assignment
         assignment = course.get_assignment(metadata["id"])
 
+        # Submission files
+        print("Uploading submission files...")
+        file_ids = []
+        for file_path in staged:
+            file = assignment.upload_to_submission(file_path)[1]
+            file_ids.append(file["id"])
+
         # Submit assignment
+        print("Submitting assignment...")
         assignment.submit(
             {"submission_type": "online_upload", "file_ids": file_ids}
         )

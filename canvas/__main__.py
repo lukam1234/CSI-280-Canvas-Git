@@ -26,6 +26,7 @@ async def main() -> None:
         | CanvasScope.CREATE_ACCESS_TOKEN
         | CanvasScope.UPDATE_ACCESS_TOKEN
         | CanvasScope.DELETE_ACCESS_TOKEN
+        | CanvasScope.UPLOAD_SUBMISSION_FILE
     )
 
     auth = CanvasAuth(
