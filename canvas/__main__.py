@@ -39,8 +39,7 @@ async def main() -> None:
     await auth.authenticate()
     token = await auth.fetch_token()
     
-    API_URL = os.getenv("API_URL")
-    client = Canvas(API_URL, token)
+    client = Canvas(os.getenv("API_URL"), token)
 
     # Run the command
     cmd = CommandManager.get_command(
