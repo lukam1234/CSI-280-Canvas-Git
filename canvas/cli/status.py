@@ -43,7 +43,7 @@ class StatusCommand(CanvasCommand):
         # Print special message if no files are staged
         if not staged:
             print("No files are currently staged.")
-            exit()
+            return
 
         # Print all staged files
         print("Currently staged:")

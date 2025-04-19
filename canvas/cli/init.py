@@ -125,7 +125,7 @@ class InitCommand(CanvasCommand):
         if self.course_id is None:
             # Change to showing them a list and asking them to choose
             print("--course_id flag is required")
-            exit()
+            return
 
         print("Initializing course...")
         self.course = self.client.get_course(self.course_id)
@@ -140,7 +140,7 @@ class InitCommand(CanvasCommand):
                 "Course has already been initialized in this directory."
                 "\nDelete the course files or initialize somewhere else."
             )
-            exit()
+            return
 
         # Create course folder
         course_dir.mkdir(parents=True, exist_ok=True)

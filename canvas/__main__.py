@@ -26,6 +26,7 @@ async def main() -> None:
         | CanvasScope.CREATE_ACCESS_TOKEN
         | CanvasScope.UPDATE_ACCESS_TOKEN
         | CanvasScope.DELETE_ACCESS_TOKEN
+        | CanvasScope.UPLOAD_SUBMISSION_FILE
     )
 
     auth = CanvasAuth(
@@ -38,8 +39,7 @@ async def main() -> None:
     await auth.authenticate()
     token = await auth.fetch_token()
     
-    API_URL = os.getenv("API_URL")
-    client = Canvas(API_URL, token)
+    client = Canvas(os.getenv("API_URL"), token)
 
     # Run the command
     cmd = CommandManager.get_command(

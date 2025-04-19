@@ -43,6 +43,7 @@ class CanvasScope(Flag):
     CREATE_ACCESS_TOKEN = auto()
     UPDATE_ACCESS_TOKEN = auto()
     DELETE_ACCESS_TOKEN = auto()
+    UPLOAD_SUBMISSION_FILE = auto()
 
     @classmethod
     def from_str(cls, scope_str: str) -> CanvasScope:
@@ -74,6 +75,7 @@ class CanvasScope(Flag):
             CanvasScope.CREATE_ACCESS_TOKEN: "url:POST|/api/v1/users/:user_id/tokens",
             CanvasScope.UPDATE_ACCESS_TOKEN: "url:PUT|/api/v1/users/:user_id/tokens/:id",
             CanvasScope.DELETE_ACCESS_TOKEN: "url:DELETE|/api/v1/users/:user_id/tokens/:id",
+            CanvasScope.UPLOAD_SUBMISSION_FILE: "url:POST|/api/v1/courses/:course_id/assignments/:assignment_id/submissions/:user_id/files",
         }
 
         if self == CanvasScope.NONE:

@@ -42,7 +42,7 @@ class StageCommand(CanvasCommand):
                 str(CanvasCommand.get_rel_path(file_to_stage)),
                 "does not exist.",
             )
-            exit()
+            return
 
         print(f"Staging {str(CanvasCommand.get_rel_path(file_to_stage))}")
 
@@ -51,7 +51,7 @@ class StageCommand(CanvasCommand):
             root = self.get_course_root()
         except NotCanvasCourseException:
             print("Must be run from inside a canvas course.")
-            exit()
+            return
 
         # Read currently staged paths
         staged_file = root / ".canvas" / "staged.json"
@@ -64,7 +64,7 @@ class StageCommand(CanvasCommand):
                 str(CanvasCommand.get_rel_path(file_to_stage)),
                 "is already staged.",
             )
-            exit()
+            return
 
         # Exit if outside an assignment folder
         if (
@@ -73,7 +73,7 @@ class StageCommand(CanvasCommand):
         ):
             print("Staging assignment is ambiguous in this context.")
             print("Move your file into an assignment's folder.")
-            exit()
+            return
 
         # Exit if assignment folders vary between staged files
         if staged and (
@@ -87,7 +87,7 @@ class StageCommand(CanvasCommand):
                 "assignment folder as previously staged files or unstage the\n"
                 "currently staged files and try staging again."
             )
-            exit()
+            return
 
         # Write staged file paths with new one appended
         staged.append(str(file_to_stage))
